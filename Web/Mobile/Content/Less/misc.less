@@ -1,0 +1,16 @@
+﻿@import "mixins.less";
+@import "misc.less";
+
+.left-right {
+    display: flex;
+    & > *:first-child {
+        margin-right: 2rem;
+    }
+    & > * {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
+
+.padding { padding: @gutter; }
+.margin { margin: @gutter; }
