@@ -3,10 +3,10 @@
 Implement `.vue` single-file component with server-side ViewModel in a `.ascx` file.
 
 
-```C#
+```HTML
 <script runat="server">
 
-    public class ComponentVM : ViewModel
+    public class LoginVM : ViewModel
     {
         public Username { get; set; }
         public Password { get; set; }
@@ -19,20 +19,28 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
     }
     
 </script>
+
 <template>
-    <div>
-        Username: <input type="text" v-model="Username" /><br/>
-        Password: <input type="password" v-model="Password" /><br/>
-        <button class="btn-login" @click="Login()">Login</button>
+    <div class="login-box">
+        <label>Username</label>
+        <input type="text" v-model="Username" />
+        <label>Password</label>
+        <input type="password" v-model="Password" />
+        <button @click="Login()">Login</button>
         <a @click="Clear()">Clear</a>
-        
         <div v-show="Message" class="alert">{{ Message }}</div>
-        
     </div>
 </template>
-<style>
-    .btn-login { ... }
+
+<style lang="less">
+    @import "base.less";
+    .login-box {
+        border: 1px solid @line-color;
+        button { display: block; }
+        .alert { ... }
+    }
 </style>
+
 <script>
     // Vue mixin (client only)
     return {
@@ -43,7 +51,6 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
             }
         }
     }
-
 </script>
 ```
 
