@@ -4,7 +4,6 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
 
 
 ```C#
-<%@ Control Language="C#" %>
 <script runat="server">
 
     public class ComponentVM : ViewModel
@@ -17,32 +16,30 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
         {
             Message = AuthServie.Login(Username, Password);
         }
-        
-        public void Username_Watch(string value, string old)
-        {
-            // observe changes from client
-        }
     }
     
 </script>
 <template>
     <div>
-        Username: <input type="text" v-model.lazy="Username" /><br/>
+        Username: <input type="text" v-model="Username" /><br/>
         Password: <input type="password" v-model="Password" /><br/>
-        <button type="button" v-on:click="Login()">Login</button>
-        <hr/>
-        {{ Message }}
+        <button class="btn-login" @click="Login()">Login</button>
+        <a @click="Clear()">Clear</a>
+        
+        <div v-show="Message" class="alert">{{ Message }}</div>
+        
     </div>
 </template>
 <style>
-    .my-button { ... }
+    .btn-login { ... }
 </style>
 <script>
-    // vue mixin
+    // Vue mixin (client only)
     return {
         methods: {
-            showError: function() {
-               // ..
+            Clear: function() {
+               this.Username = "";
+               this.Password = "";
             }
         }
     }
@@ -50,12 +47,19 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
 </script>
 ```
 
+# Features
+
+- Server based ViewModel with attributes decorations: methods, watchs and props
+- Render in `.ascx` or `.vue` file in a single javascript Vue component
+- Bootstrap and discover all components
+- Support custom tag compiler (like LESS for style or TypeScript)
+
+
 # TODO
 
-- Support 3 different ways to script:
+- Support 2 ways to client script:
 ```
-    <script> (xN)
-    <script src=".."> (xN)
+    <script> (render before vue {..}, to create custom methods)
     <script mixin> (x1)
 ```   
    
@@ -66,21 +70,3 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
     - Length
     
 - Support to external "src" in tags
-- Support custom ScriptRender e ComponentExecution
-
-- Support to custom tags. This tags can be readed when?
-
-<doc>
-    # Implement documents
-    - In markdown format
-    - Or any other format
-<doc>    
-<resource>
-    read - Read data
-    write - Write data
-    execute - Permition to execute some operation
-</resource>
-<menu>
-    <name>Items selecionavel</name>
-    <app>XPS</app>
-</menu>
