@@ -54,6 +54,22 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 </script>
 ```
 
+## Setup
+
+- Add `.vue` handler
+```XML
+    <handlers>
+      <add name="vue" path="*.vue" type="DotVue.Handler, DotVue" verb="*"/>
+    </handlers>
+```
+- Add in your page script for `bootstrap.vue` and with discover all components
+```HTML
+    <script src="bootstrap.vue?discover=async"></script>
+```
+
+- Write you own .ascx component as Vue single component
+
+
 # Features
 
 - Server based ViewModel with attributes decorations: methods, watchs and props
