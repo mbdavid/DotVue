@@ -24,6 +24,9 @@
         <ui-textbox v-model="Password" label="Password" type="password" />
         <div style="margin-top: 2rem;">
             <ui-button @click="Login()" color="primary" size="large" :raised="true">Login</ui-button>
+            <span class="help">
+                Use any username/password
+            </span>
         </div>
     </div>
 
@@ -45,6 +48,13 @@
         color: @mdc-grey-800;
         margin-top: 0;
         text-align: center;
+    }
+
+    .login-box .help {
+        color: @mdc-grey-400;
+        float: right;
+        font: 90%;
+        font-style: italic;
     }
 
 </style>

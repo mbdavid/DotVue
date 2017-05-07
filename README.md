@@ -1,6 +1,6 @@
 # DotVue
 
-Implement `.vue` single-file component with server-side ViewModel in a `.ascx` file.
+Implement `.vue` single-file component with server-side ViewModel using `.ascx` file.
 
 
 ```HTML
@@ -57,10 +57,13 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
 # Features
 
 - Server based ViewModel with attributes decorations: methods, watchs and props
-- Render in `.ascx` or `.vue` file in a single javascript Vue component
+- Support file upload
+- `C#` DateTime to `Date()` javascript object
+- Resolve computed server-side expression to javascript function (using simple LINQ visitor)
+- Support multiple loaders: `.ascx`, `.vue` or static file to render as single javascript Vue component
 - Bootstrap and discover all components
-- Support custom tag compiler (like LESS for style or TypeScript)
-
+- Support custom tag compiler (like LESS or TypeScript)
+- Ready for any Vue plugin
 
 # TODO
 
@@ -77,3 +80,12 @@ Implement `.vue` single-file component with server-side ViewModel in a `.ascx` f
     - Length
     
 - Support to external "src" in tags
+- Support multiple loader() with orders
+- Cache discover + Load before
+
+- StaticLoader
+
+StaticLoader.RegisterComponent("NButton", typeof(NButtonVM), Stream content);
+
+
+

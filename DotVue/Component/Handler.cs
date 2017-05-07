@@ -12,7 +12,11 @@ namespace DotVue
         /// <summary>
         /// Define custom vue file loader
         /// </summary>
-        public static IComponentLoader Loader { get; set; } = new AscxLoader();
+        public static List<IComponentLoader> Loaders { get; private set; } = new List<IComponentLoader>()
+        {
+            new AscxLoader(),
+            new StaticLoader()
+        };
 
         public bool IsReusable { get { return false; } }
 
@@ -37,18 +41,19 @@ namespace DotVue
 
                 if (string.IsNullOrEmpty(discover)) return;
 
-                // register all components with async load
-                foreach (var c in Loader.Discover(context))
-                {
-                    context.Response.Output.Write("\n//\n");
-                    context.Response.Output.Write("// Registering Vue Components\n");
-                    context.Response.Output.Write("//\n");
+                context.Response.Output.Write("\n//\n");
+                context.Response.Output.Write("// Registering Vue Components\n");
+                context.Response.Output.Write("//\n");
 
+                // register all components with async load
+                foreach (var loader in Loaders)
+                foreach (var c in loader.Discover(context))
+                {
                     context.Response.Output.Write("\nVue.component('{0}', Vue.$loadComponent(", c.Name);
 
                     if (discover == "sync")
                     {
-                        var component = Loader.Load(context, c.VPath);
+                        var component = loader.Load(context, c.VPath);
                         context.Response.Output.Write("function() {\n");
                         component.RenderScript(context.Response.Output);
                         context.Response.Output.Write("}");
@@ -64,8 +69,7 @@ namespace DotVue
             else if(isLoad)
             {
                 // render component script
-                Loader
-                    .Load(context, path)
+                Load(context, path)
                     .RenderScript(context.Response.Output);
             }
             else if(isPost)
@@ -80,12 +84,24 @@ namespace DotVue
                 var parameters = JArray.Parse(request.Form["params"]).ToArray();
                 var files = request.Files.GetMultiple("files");
 
-                var component = Loader.Load(context, path);
+                var component = Load(context, path);
 
                 component.UpdateModel(data, props, method, parameters, files, response.Output);
 
                 response.ContentType = "text/json";
             }
+        }
+
+        private Component Load(HttpContext context, string path)
+        {
+            foreach(var l in Loaders)
+            {
+                var c = l.Load(context, path);
+
+                if(c != null) return c;
+            }
+
+            throw new HttpException("Vue component [" + path + "] not found");
         }
     }
 }

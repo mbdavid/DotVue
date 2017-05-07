@@ -63,6 +63,10 @@ namespace DotVue
 
                 return new Component(vpath, viewModelType, content.ToString());
             }
+            catch (IOException)
+            {
+                return null;
+            }
             catch (Exception ex)
             {
                 return new Component(vpath, typeof(EmptyViewModel), "<template><div>" + ex.Message + "</div></template>");

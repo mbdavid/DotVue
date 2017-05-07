@@ -43,8 +43,6 @@ namespace DotVue
                 var content = new StringBuilder();
                 var control = loader.LoadControl(ascx);
 
-                if (control == null) throw new Exception("UserControl ascx not found: " + vpath);
-
                 using (var sw = new StringWriter(content))
                 {
                     using (var w = new HtmlTextWriter(sw))
@@ -68,6 +66,10 @@ namespace DotVue
                 var content = re.Match(html).Groups["content"];
 
                 return new Component(vpath, typeof(EmptyViewModel), "<template><div>" + content + "</div></template>");
+            }
+            catch (HttpException)
+            {
+                return null; // file not found
             }
         }
     }
