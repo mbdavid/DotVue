@@ -88,20 +88,15 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
     <script> (render before vue {..}, to create custom methods)
     <script mixin> (x1)
 ```   
-   
-- VueList<T> : IList<T> (capture changes)    
-    - Add(T item)
-    - Set(int index, Action<T> fn)
-    - Remove(int index)
-    - Length
+
+- Partial updates
+    - In objects
+    - In Lists (`VueList<T> : IList<T>`)
+        - Add(T item)
+        - Set(int index, Action<T> fn)
+        - Remove(int index)
+        - Length
     
 - Support to external "src" in tags
 - Support multiple loader() with orders
 - Cache discover + Load before
-
-- StaticLoader
-
-StaticLoader.RegisterComponent("NButton", typeof(NButtonVM), Stream content);
-
-
-

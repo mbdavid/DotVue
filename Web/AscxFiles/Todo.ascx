@@ -19,6 +19,7 @@
         {
             Items.Add(new Todo { Text = CurrentText, Done = false });
             CurrentText = "";
+            JS.Code("this.$refs.input.focus();");
         }
 
         public void Remove(int index)
@@ -45,9 +46,9 @@
         <h3>Todo List</h3>
         <hr />
         <div>
-            <input type="text" v-model="CurrentText" autofocus placeholder="Add new Item"/>
-            <button v-on:click="Add()" :disabled="!CurrentText" type="button">Add</button>
-            <button v-on:click="Clear()" type="button">Clear all</button>
+            <input type="text" v-model="CurrentText" @keyup.enter="Add()" autofocus placeholder="Add new Item" ref="input"/>
+            <button @click="Add()" :disabled="!CurrentText">Add</button>
+            <button @click="Clear()">Clear all</button>
             <input type="text" v-model="FilterText" placeholder="Filter by text" />
         </div>
         <hr />
