@@ -1,4 +1,7 @@
-﻿(function () {
+﻿//
+// DotVue - Vue plugin for update ViewModel in server
+//
+(function () {
 
     var _styles = {};
     var _json = new JsonEx();

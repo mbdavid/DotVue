@@ -41,29 +41,33 @@ namespace DotVue
 
                 if (string.IsNullOrEmpty(discover)) return;
 
-                context.Response.Output.Write("\n//\n");
+                context.Response.Output.Write("\n\n//\n");
                 context.Response.Output.Write("// Registering Vue Components\n");
-                context.Response.Output.Write("//\n");
+                context.Response.Output.Write("//");
 
                 // register all components with async load
                 foreach (var loader in Loaders)
-                foreach (var c in loader.Discover(context))
                 {
-                    context.Response.Output.Write("\nVue.component('{0}', Vue.$loadComponent(", c.Name);
+                    context.Response.Output.Write("\n\n// Loader: " + loader.GetType().Name);
 
-                    if (discover == "sync")
+                    foreach (var c in loader.Discover(context))
                     {
-                        var component = loader.Load(context, c.VPath);
-                        context.Response.Output.Write("function() {\n");
-                        component.RenderScript(context.Response.Output);
-                        context.Response.Output.Write("}");
-                    }
-                    else // async
-                    {
-                        context.Response.Output.WriteFormat("'{0}'", c.VPath);
-                    }
+                        context.Response.Output.Write("\nVue.component('{0}', Vue.$loadComponent(", c.Name);
 
-                    context.Response.Output.Write("));");
+                        if (discover == "sync")
+                        {
+                            var component = loader.Load(context, c.VPath);
+                            context.Response.Output.Write("function() {\n");
+                            component.RenderScript(context.Response.Output);
+                            context.Response.Output.Write("}");
+                        }
+                        else // async
+                        {
+                            context.Response.Output.WriteFormat("'{0}'", c.VPath);
+                        }
+
+                        context.Response.Output.Write("));");
+                    }
                 }
             }
             else if(isLoad)
@@ -92,6 +96,9 @@ namespace DotVue
             }
         }
 
+        /// <summary>
+        /// Load component from any loaders and cache result
+        /// </summary>
         private Component Load(HttpContext context, string path)
         {
             foreach(var l in Loaders)
