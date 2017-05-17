@@ -28,6 +28,7 @@
             <a :class="{sel: current == 'Static'}" href="#/Static">Static</a>
         </div>
 
+
         <keep-alive>
             <component ref="page" :is="current" :query="query"></component>
         </keep-alive>
