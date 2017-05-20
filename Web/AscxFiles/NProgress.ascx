@@ -12,6 +12,12 @@
 
             Done = "Document done from server: " + DateTime.Now;
         }
+
+        [NProgress, Loading("btn")]
+        public void Wait(int time)
+        {
+            System.Threading.Thread.Sleep(time);
+        }
     }
 
 </script>
@@ -19,6 +25,8 @@
     <div class="hidden">
         <h3>Progress bar</h3><hr />
         {{ Done }}
+        <hr />
+        <button @click="Wait(2000)" ref="btn">Click and Wait</button>
         <hr />
         <button @click="finish()">Destroy and Go to Page1</button>
     </div>

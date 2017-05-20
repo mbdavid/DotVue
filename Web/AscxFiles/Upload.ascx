@@ -33,16 +33,16 @@
 
         <hr />
         <input type="file" ref="file1" />
-        <button @click="Upload($refs.file1)">Upload</button>
+        <button @click="Upload($refs.file1)">Upload Single File</button>
 
         <hr />
         <input type="file" ref="fileA" />
         <input type="file" ref="fileB" />
-        <button @click="Upload2($refs.fileA, $refs.fileB)">Upload A&B</button>
+        <button @click="Upload2($refs.fileA, $refs.fileB)">Upload A & B</button>
 
         <hr />
         <input type="file" ref="fileM" multiple />
-        <button @click="UploadMultiple($refs.fileM)">Upload Multiple</button>
+        <button @click="UploadMultiple($refs.fileM)">Upload Multiples</button>
 
         <hr />
         <input type="file" ref="fileP" multiple />
