@@ -72,6 +72,7 @@
   <ItemGroup>
     <Content Include="AscxFiles\NProgress.ascx" />
     <Content Include="AscxFiles\Static.ascx" />
+    <Content Include="AscxFiles\Upload.ascx" />
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="Mobile\Content\Components\VCard.ascx" />

@@ -18,7 +18,7 @@
             Vue.prototype.$parseJsonEx = _json.parse;
 
             // request new server call
-            Vue.prototype.$update = function $update(vm, name, params, files) {
+            Vue.prototype.$update = function $update(vm, name, params) {
 
                 return new Promise(function (resolve) {
 
@@ -26,7 +26,6 @@
                         vm: vm,
                         name: name,
                         params: params || [],
-                        files: files || null,
                         resolve: resolve
                     });
 
@@ -108,20 +107,26 @@
                 var form = new FormData();
 
                 form.append('method', request.name);
-                form.append('params', _json.stringify(request.params));
-                form.append('data', _json.stringify(request.vm.$data || { }));
+                form.append('data', _json.stringify(request.vm.$data || {}));
                 form.append('props', _json.stringify(request.vm.$props || {}));
 
-                // select elements with for upload file
-                if (request.files) {
-                    files = request.vm.$el.querySelectorAll(request.files);
-                    files.forEach(function (file) {
-                        for (var i = 0; i < file.files.length; i++) {
-                            form.append('files', file.files[i]);
-                            log('$upload ("' + file.files[i].name + '")... ', file.files[i].size);
+                // upload file
+                request.params.forEach(function (value, index, arr) {
+
+                    var isFile = value instanceof HTMLInputElement && value.type == 'file';
+
+                    if (isFile) {
+                        var name = "files_" + (Math.floor(Math.random() * 899998) + 100000);
+                        for (var i = 0; i < value.files.length; i++) {
+                            form.append(name, value.files[i]);
+                            log('$upload ("' + value.files[i].name + '")... ', value.files[i].size);
                         }
-                    });
-                }
+                        value.value = null;
+                        arr[index] = name;
+                    }
+                });
+
+                form.append('params', _json.stringify(request.params));
 
                 log('$update ("' + request.name + '") = ', request.params);
 

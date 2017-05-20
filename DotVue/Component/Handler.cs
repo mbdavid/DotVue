@@ -86,11 +86,10 @@ namespace DotVue
                 var props = request.Form["props"];
                 var method = request.Form["method"];
                 var parameters = JArray.Parse(request.Form["params"]).ToArray();
-                var files = request.Files.GetMultiple("files");
 
                 var component = Load(context, path);
 
-                component.UpdateModel(data, props, method, parameters, files, response.Output);
+                component.UpdateModel(data, props, method, parameters, request.Files, response.Output);
 
                 response.ContentType = "text/json";
             }

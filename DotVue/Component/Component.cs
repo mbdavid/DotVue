@@ -108,21 +108,13 @@ namespace DotVue
 
                     // get all parameters without HttpPostFile parameters
                     var parameters = m.GetParameters()
-                        .Where(x => x.ParameterType != typeof(HttpPostedFile) && x.ParameterType != typeof(List<HttpPostedFile>))
                         .Select(x => x.Name);
 
-                    // get if any parameter are file(s)
-                    var upload = m.GetParameters()
-                        .Where(x => x.ParameterType == typeof(HttpPostedFile) || x.ParameterType == typeof(List<HttpPostedFile>))
-                        .Select(x => x.Name)
-                        .FirstOrDefault() ?? "null";
-
-                    writer.WriteFormat("    {0}: function({1}) {{{2}\n      this.$update(this, '{0}', [{3}], {4}){5};\n    }}{6}\n",
+                    writer.WriteFormat("    {0}: function({1}) {{{2}\n      this.$update(this, '{0}', [{3}]){4};\n    }}{5}\n",
                         m.Name,
                         string.Join(", ", m.GetParameters().Select(x => x.Name)),
                         pre,
                         string.Join(", ", parameters),
-                        upload,
                         post.Length > 0 ? "\n          .then(function(vm) { (function() {" + post + "\n          }).call(vm); })" : "",
                         m == methods.Last() ? "" : ",");
                 }
@@ -233,7 +225,7 @@ namespace DotVue
 
         #region Update Model
 
-        public void UpdateModel(string data, string props, string method, JToken[] parameters, IList<HttpPostedFile> files, TextWriter writer)
+        public void UpdateModel(string data, string props, string method, JToken[] parameters, HttpFileCollection files, TextWriter writer)
         {
             using (var vm = (ViewModel)Activator.CreateInstance(ViewModelType))
             {
@@ -249,59 +241,57 @@ namespace DotVue
             }
         }
 
-        private void ExecuteMethod(ViewModel vm, string name, JToken[] parameters, IList<HttpPostedFile> files)
+        private void ExecuteMethod(ViewModel vm, string name, JToken[] parameters, HttpFileCollection files)
         {
-            var method = ViewModelType
+            var methods = ViewModelType
                 .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
                 .Where(x => x.Name == name)
                 .Where(x => x.IsFamily || x.IsPublic)
-                .FirstOrDefault();
+                .ToList();
 
-            if (method == null) throw new SystemException("Method " + name + " do not exists or are not public/protected or has not same parameters length");
+            if (methods.Count == 0 || methods.Count > 1) throw new SystemException("Method " + name + " do not exists, are not public/protected or has more than one signature");
 
+            var method = methods.First();
             var pars = new List<object>();
             var index = 0;
 
-            if (method == null) throw new ArgumentNullException("Method " + name + " not found on " + this.GetType().Name + " view model or are not instance public method");
-
             foreach (var p in method.GetParameters())
             {
+                var token = parameters[index++];
+
                 if (p.ParameterType == typeof(HttpPostedFile))
                 {
-                    pars.Add(files.FirstOrDefault());
+                    var value = ((JValue)token).Value.ToString();
+
+                    pars.Add(files.GetMultiple(value).FirstOrDefault());
                 }
-                else if (p.ParameterType == typeof(List<HttpPostedFile>))
+                else if (p.ParameterType == typeof(List<HttpPostedFile>) || p.ParameterType == typeof(IList<HttpPostedFile>))
                 {
-                    pars.Add(new List<HttpPostedFile>(files));
+                    var value = ((JValue)token).Value.ToString();
+
+                    pars.Add(new List<HttpPostedFile>(files.GetMultiple(value)));
+                }
+                else if (token.Type == JTokenType.Object)
+                {
+                    var obj = ((JObject)token).ToObject(p.ParameterType);
+
+                    pars.Add(obj);
+                }
+                else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
+                {
+                    var value = ((JValue)token).Value.ToString();
+
+                    pars.Add(Enum.Parse(p.ParameterType, value));
                 }
                 else
                 {
-                    var token = parameters[index++];
+                    var value = ((JValue)token).Value;
 
-                    if (token.Type == JTokenType.Object)
-                    {
-                        var obj = ((JObject)token).ToObject(p.ParameterType);
-
-                        pars.Add(obj);
-                    }
-                    else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
-                    {
-                        var value = ((JValue)token).Value.ToString();
-
-                        pars.Add(Enum.Parse(p.ParameterType, value));
-                    }
-                    else
-                    {
-                        var value = ((JValue)token).Value;
-
-                        pars.Add(Convert.ChangeType(value, p.ParameterType));
-                    }
+                    pars.Add(Convert.ChangeType(value, p.ParameterType));
                 }
             }
 
-            var args = pars.ToArray();
-
-            ViewModel.Execute(vm, method, args);
+            ViewModel.Execute(vm, method, pars.ToArray());
         }
 
         private void RenderUpdate(ViewModel vm, string model, TextWriter writer)
