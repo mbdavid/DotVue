@@ -62,7 +62,7 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
       <add name="vue" path="*.vue" type="DotVue.Handler, DotVue" verb="*"/>
     </handlers>
 ```
-- Add in your page script for `bootstrap.vue` and with discover all components
+- Add in your page script for `bootstrap.vue` and with discover all components: sync (inline) or async (via ajax loader)
 ```HTML
     <script src="bootstrap.vue?discover=async"></script>
 ```
@@ -74,7 +74,6 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 
 - Server based ViewModel with attributes decorations: methods, watchs and props
 - Support file upload
-- `C#` DateTime to `Date()` javascript object
 - Resolve computed server-side expression to javascript function (using simple LINQ visitor)
 - Support multiple loaders: `.ascx`, `.vue` or static file to render as single javascript Vue component
 - Bootstrap and discover all components
@@ -83,20 +82,6 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 
 # TODO
 
-- Support 2 ways to client script:
-```
-    <script> (render before vue {..}, to create custom methods)
-    <script mixin> (x1)
-```   
-
-- Partial updates
-    - In objects
-    - In Lists (`VueList<T> : IList<T>`)
-        - Add(T item)
-        - Set(int index, Action<T> fn)
-        - Remove(int index)
-        - Length
-    
 - Support to external "src" in tags
 - Support multiple loader() with orders
 - Cache discover + Load before
