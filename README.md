@@ -21,28 +21,39 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 </script>
 
 <template>
+
     <div class="login-box">
-        <label>Username</label>
-        <input type="text" v-model="Username" />
-        <label>Password</label>
-        <input type="password" v-model="Password" />
-        <button @click="Login()">Login</button>
-        <a @click="Clear()">Clear</a>
+        <p>
+            <label>Username</label>
+            <input type="text" v-model="Username" />
+        </p>
+        <p>
+            <label>Password</label>
+            <input type="password" v-model="Password" />
+        </p>
+        <p>
+            <button @click="Login()">Login</button>
+            <a @click="Clear()">Clear</a>
+        </p>
         <div v-show="Message" class="alert">{{ Message }}</div>
     </div>
+    
 </template>
 
 <style lang="less">
-    /* Support syle tags */
+
+    /* Support less tags */
     @import "base.less";
+    
     .login-box {
         border: 1px solid @line-color;
         button { display: block; }
-        .alert { ... }
     }
+    
 </style>
 
 <script>
+
     // Optional: add Vue mixin (client only)
     return {
         methods: {
@@ -53,6 +64,7 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
             }
         }
     }
+    
 </script>
 ```
 
@@ -84,5 +96,4 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 # TODO
 
 - Support to external "src" in tags
-- Support multiple loader() with orders
 - Cache discover + Load before
