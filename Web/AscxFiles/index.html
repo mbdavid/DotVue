@@ -27,6 +27,7 @@
             <a :class="{sel: current == 'NProgress'}" href="#/NProgress">NProgress</a>
             <a :class="{sel: current == 'Static'}" href="#/Static">Static</a>
             <a :class="{sel: current == 'Upload'}" href="#/Upload">Upload</a>
+            <a :class="{sel: current == 'DataType'}" href="#/DataType">DataType</a>
         </div>
 
 
@@ -38,6 +39,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
     <script src="https://rawgit.com/mbdavid/routerjs/master/router.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.6/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
     <script src="bootstrap.vue?discover=async"></script>
     <script>
 
@@ -58,6 +60,15 @@
                 router();
             }
         });
+
+        Vue.component('input-date', {
+            template: '<input ref="input" :value="value" @input="update($event.target.value)" />',
+            props: ['value'],
+            methods: {
+                update: function (v) {
+                }
+            }
+        })
 
     </script>
 

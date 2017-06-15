@@ -4,7 +4,7 @@
 (function () {
 
     var _styles = {};
-    var _json = new JsonEx();
+    var _json = JSON; //new JsonEx();
 
     // register vue plugin to server call (vue.$update)
     const DotVue = {
