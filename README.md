@@ -33,6 +33,7 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 </template>
 
 <style lang="less">
+    /* Support syle tags */
     @import "base.less";
     .login-box {
         border: 1px solid @line-color;
@@ -42,12 +43,13 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 </style>
 
 <script>
-    // Vue mixin (client only)
+    // Optional: add Vue mixin (client only)
     return {
         methods: {
             Clear: function() {
                this.Username = "";
                this.Password = "";
+               this.Message = "";
             }
         }
     }
@@ -68,7 +70,6 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 ```
 
 - Write you own .ascx component as Vue single component
-
 
 # Features
 
