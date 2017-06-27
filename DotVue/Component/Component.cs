@@ -84,7 +84,7 @@ namespace DotVue
 
             // append template string
             writer.WriteFormat("  template: '{0}',\n", Template.EncodeJavascript());
-            writer.WriteFormat("  data: function() {{\n    return this.$parseJsonEx('{0}');\n  }},\n", JsonConvert.SerializeObject(vm, _serializeSettings));
+            writer.WriteFormat("  data: function() {{\n    return {0};\n  }},\n", JsonConvert.SerializeObject(vm, _serializeSettings));
 
             // get methods
             var methods = ViewModelType
@@ -181,7 +181,7 @@ namespace DotVue
 
         private static Dictionary<string, Func<string, string>> _compilers = new Dictionary<string, Func<string, string>>(StringComparer.InvariantCultureIgnoreCase);
 
-        private static Regex _reTemplate = new Regex(@"<template(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/template>");
+        private static Regex _reTemplate = new Regex(@"<template(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*)\s*<\/template>");
         private static Regex _reStyle = new Regex(@"<style(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/style>");
         private static Regex _reScript = new Regex(@"<script(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/script>");
 

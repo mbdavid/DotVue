@@ -50,6 +50,7 @@
         <pre>$data: {{ $data }}</pre>
         <pre>$props: {{ $props }}</pre>
     </div>
+
 </template>
 <style>
     .page2 h4 { color: blue; }

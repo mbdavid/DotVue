@@ -4,7 +4,6 @@
 (function () {
 
     var _styles = {};
-    var _json = JSON; //new JsonEx();
 
     // register vue plugin to server call (vue.$update)
     const DotVue = {
@@ -15,7 +14,6 @@
 
             // in watch, test before call if field are not been updated
             Vue.prototype.$updating = false;
-            Vue.prototype.$parseJsonEx = _json.parse;
 
             // request new server call
             Vue.prototype.$update = function $update(vm, name, params) {
@@ -71,7 +69,7 @@
                         return;
                     }
 
-                    var response = _json.parse(xhr.responseText);
+                    var response = JSON.parse(xhr.responseText);
                     var update = response['update'];
                     var js = response['js'];
 
@@ -107,8 +105,8 @@
                 var form = new FormData();
 
                 form.append('method', request.name);
-                form.append('data', _json.stringify(request.vm.$data || {}));
-                form.append('props', _json.stringify(request.vm.$props || {}));
+                form.append('data', JSON.stringify(request.vm.$data || {}));
+                form.append('props', JSON.stringify(request.vm.$props || {}));
 
                 // upload file
                 request.params.forEach(function (value, index, arr) {
@@ -126,7 +124,7 @@
                     }
                 });
 
-                form.append('params', _json.stringify(request.params));
+                form.append('params', JSON.stringify(request.params));
 
                 log('$update ("' + request.name + '") = ', request.params);
 
@@ -185,75 +183,6 @@
     }
 
     Vue.use(DotVue);
-
-    // Extended JSON class to parse/stringify with support DateTime from JSON.NET
-    function JsonEx() {
-
-        // JSON RegExp
-        var rvalidchars = /^[\],:{}\s]*$/;
-        var rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
-        var rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
-        var rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g;
-        var dateISO = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)(Z|[-+]\d{2}:\d{2})?$/;
-
-        function f(n) {
-            return n < 10 ? '0' + n : n;
-        }
-
-        function convertStringify(key, value) {
-
-            if (typeof value == "string") {
-                var a = dateISO.exec(value);
-                if (a) {
-                    var val = new Date(value);
-                    return val.getFullYear() + '-' +
-                        f(val.getMonth() + 1) + '-' +
-                        f(val.getDate()) + 'T' +
-                        f(val.getHours()) + ':' +
-                        f(val.getMinutes()) + ':' +
-                        f(val.getSeconds()) + '.' +
-                        f(val.getMilliseconds()) + 'Z';
-                }
-            }
-            return value;
-        }
-
-        function convertParse(key, value) {
-            if (typeof (value) === "string") {
-                var a = dateISO.exec(value);
-                if (a) {
-                    return new Date(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]);
-                }
-            }
-            return value;
-        }
-
-        this.parse = function (data) {
-
-            if (typeof data !== "string" || !data) return null;
-
-            data = data.replace(/^\s\s*/, "").replace(/\s\s*$/, "");
-
-            // Make sure the incoming data is actual JSON
-            // Logic borrowed from http://json.org/json2.js
-            if (rvalidchars.test(data
-                .replace(rvalidescape, "@")
-                .replace(rvalidtokens, "]")
-                .replace(rvalidbraces, ""))) {
-                try {
-                    return window.JSON.parse(data, convertParse);
-                }
-                catch (e) {
-                    throw "Error in parseJSON(\"" + data + "\") : " + e;
-                }
-            }
-            return null;
-        }
-
-        this.stringify = function (obj, space) {
-            return window.JSON.stringify(obj, convertStringify, space);
-        }
-    }
 
     // execute console log without showing file: http://stackoverflow.com/questions/34762774/how-to-hide-source-of-log-messages-in-console
     function log() {
