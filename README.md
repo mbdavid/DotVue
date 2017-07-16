@@ -97,3 +97,5 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 
 - Support to external "src" in tags
 - Cache discover + Load before
+- Support mobile template tag
+- Support "import/require" in <script> (async? like requireJS)

@@ -1,4 +1,9 @@
 ﻿<%@ Control Language="C#" %>
+<markdown>
+# Document
+- Item 1
+- Item 2
+</markdown>
 <script runat="server">
 
     public class ComponentVM : ViewModel

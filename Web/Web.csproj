@@ -70,9 +70,12 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="AscxFiles\Controls.ascx" />
+    <Content Include="AscxFiles\LayoutContent.ascx" />
     <Content Include="AscxFiles\NProgress.ascx" />
     <Content Include="AscxFiles\DataType.ascx" />
-    <Content Include="AscxFiles\BaseLayout.ascx" />
+    <Content Include="AscxFiles\_NAutoComplete.ascx" />
+    <Content Include="AscxFiles\_SimpleLayout.ascx" />
     <Content Include="AscxFiles\Static.ascx" />
     <Content Include="AscxFiles\Upload.ascx" />
     <Content Include="Global.asax" />

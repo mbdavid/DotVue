@@ -11,13 +11,13 @@ namespace DotVue
 {
     internal static class Extensions
     {
-        public static string EncodeJavascript(this string str)
+        public static string EncodeJavascript(this string str, char stringDefinition = '\'')
         {
             return (str ?? "")
                 .Replace("\\", "\\\\")
                 .Replace("\r", "\\r")
                 .Replace("\n", "\\n")
-                .Replace("\'", "\\'");
+                .Replace(stringDefinition.ToString(), "\\" + stringDefinition);
         }
 
         public static string MD5(this string input)

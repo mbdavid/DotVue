@@ -93,7 +93,7 @@ namespace DotVue
                 .ToList();
 
             // include created method
-            if (created != null) methods.Insert(0, created);
+            if (oncreated) methods.Insert(0, created);
 
             if (methods.Count > 0)
             {
