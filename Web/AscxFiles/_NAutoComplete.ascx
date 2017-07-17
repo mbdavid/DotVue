@@ -1,13 +1,6 @@
 ﻿<%@ Control Language="C#" %>
-<script runat="server">
-
-    public class ComponentVM : ViewModel
-    {
-    }
-
-</script>
 <template>
-    <div class="n-auto-complete" :class="{ 'modal': showItems }">
+    <div class="n-auto-complete" :class="{ 'modal': open }">
         <input type="text"
             ref="input"
             :placeholder="placeholder"
@@ -19,14 +12,16 @@
             @keydown.up.prevent="index = (index <= 0 ? 0 : index - 1)"
             @keydown.down.prevent="index = (index >= items.length - 1 ? items.length - 1: index + 1)"
             @keydown.enter="select(index < 0 ? null : items[index], $event)"
+            @keydown.esc="clear"
         />
-        <ul v-show="showItems">
+        <ul v-show="open && items.length > 0">
             <li v-for="(item, i) in items" 
                 :class="{ 'sel': index == i }"
                 @click="select(item, $event)">
                 <slot :item="item">{{ item }}</slot>
             </li>
         </ul>
+        <div v-show="open && items.length == 0">Nenhum resultado encontrado para "{{text}}"</div>
     </div>
 </template>
 <script>
@@ -45,12 +40,6 @@
                 open: false,
                 index: -1,
                 changed: false
-            }
-        },
-        computed: {
-            showItems: function() {
-                return this.open && 
-                    this.items.length > 0;
             }
         },
         methods: {
@@ -79,6 +68,11 @@
                 this.$emit('input', item);
                 e.preventDefault();
             },
+            clear: function() {
+                this.text = this.getText(this.value);
+                this.changed = false;
+                this.open = false;
+            },
             getText: function(item) {
                 if (!item) return '';
                 return typeof item === 'string' ? item : item[this.prop || Object.keys(item)[0]];
@@ -92,7 +86,7 @@
                         this.text = null;
                         this.$emit('input', null);
                     }
-                    else if(this.index >= 0 && this.showItems) {
+                    else if(this.index >= 0 && this.open && this.items.length > 0) {
                         var item = this.items[this.index];
                         var text = this.getText(item);
                         if (this.text != text) {

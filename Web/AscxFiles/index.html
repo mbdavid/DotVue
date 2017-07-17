@@ -18,6 +18,7 @@
 <body>
 
     <div id="app" v-cloak>
+
         <h1>Index page</h1>
 
         <div class="nav">
@@ -28,15 +29,14 @@
             <a :class="{sel: current == 'Static'}" href="#/Static">Static</a>
             <a :class="{sel: current == 'Upload'}" href="#/Upload">Upload</a>
             <a :class="{sel: current == 'DataType'}" href="#/DataType">DataType</a>
-            <a :class="{sel: current == 'Layout'}" href="#/LayoutContent">Layout</a>
+            <a :class="{sel: current == 'LayoutContent'}" href="#/LayoutContent">Layout</a>
             <a :class="{sel: current == 'Controls'}" href="#/Controls">Controls</a>
         </div>
-
-
 
         <keep-alive>
             <component ref="page" :is="current" :query="query"></component>
         </keep-alive>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>

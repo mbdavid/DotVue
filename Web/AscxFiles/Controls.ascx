@@ -272,19 +272,21 @@
 
         <n-auto-complete prop="Item1" v-model="Value1" :items="Results1" @query="QueryData">
             <template scope="s">
-                [{{ s.item.Item2 }}] {{ s.item.Item1 }}
+                <div style="float: left;">{{ s.item.Item1 }}</div>
+                <div style="float:right">{{ s.item.Item2 }}</div>
             </template>
         </n-auto-complete>
 
 
         <br />Value1:<br />
-        <pre>{{ Value1 }}</pre>
+        <pre style="border: 1px solid blue;">{{ Value1 }}</pre>
 
     </div>
 
 
 </template>
 <script>
+
     return {
         watch: {
             'Value1': function(v) {
