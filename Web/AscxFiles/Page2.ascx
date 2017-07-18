@@ -42,7 +42,6 @@
             [<a href="#/Page2?id=ABC&r=4455">?id=ABC&r=4455</a>]
         </div>
 
-
         <p>Content from page2, content from page2, Content from page2</p>
         <p>Content from page2, content from page2, Content from page2</p>
         <button @click="ShowQuery()">ShowQuery()</button>
@@ -50,7 +49,6 @@
         <pre>$data: {{ $data }}</pre>
         <pre>$props: {{ $props }}</pre>
     </div>
-
 </template>
 <style>
     .page2 h4 { color: blue; }

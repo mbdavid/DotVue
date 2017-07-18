@@ -95,11 +95,23 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 
 # TODO
 
-- Support to external "src" in tags
-- Cache discover + Load before
-- Support mobile template tag (<template target="mobile"> (mobile, tablet, desktop)
-- Support "import/require" in <script> (async? like requireJS)
-    - Use new "import" tag?
-    <import src="tal.js" var="abc" />
-- Return as async (to support imports)    
+- Add more control over Component (possible to create by-hand, not only by ViewModelType class)
+    - JObject as model
+    - Template
+    - Scripts, Styles (many tags)
+    - Methods, Watchs, Pre, Pos...
+    - Name
+    - *Plugins* (add in Loader ways to auto-add?)
     
+- Support for plugins
+    Plugins are a simple way to extend a component without touch on original component. Possible to add methods, scripts and section inside template (when template offers %section% to recive more HTML)
+    - Section %form1%, %toolbar%
+    - Plugin class pipe-line on execution
+    
+- Support for mobile/tablet templates/scripts/styles
+    - <template target="mobile"> (mobile, tablet, desktop)
+
+- Support "import/require" in <script> 
+    <script src="http://cdn.net/jquery.js" var="$" /> 
+    
+- Cache discover + loader
