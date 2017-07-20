@@ -8,20 +8,20 @@ using System.Web;
 
 namespace DotVue
 {
-    public class JavascriptExpressionVisitor : ExpressionVisitor
+    public class ExprJs : ExpressionVisitor
     {
         private readonly StringBuilder _builder = new StringBuilder();
 
         public static string Resolve(Expression expr)
         {
-            var v = new JavascriptExpressionVisitor();
+            var v = new ExprJs();
             v.Visit(expr);
-            return v.JavaScriptCode;
+            return v.ToString();
         }
 
-        public string JavaScriptCode
+        public override string ToString()
         {
-            get { return _builder.ToString(); }
+            return _builder.ToString();
         }
 
         public override Expression Visit(Expression node)

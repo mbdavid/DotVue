@@ -59,7 +59,6 @@
             function ajax(request, finish) {
 
                 var xhr = new XMLHttpRequest();
-                var files = [];
 
                 xhr.onload = function () {
                     if (xhr.status < 200 || xhr.status >= 400) {
@@ -71,10 +70,7 @@
 
                     var response = JSON.parse(xhr.responseText);
                     var update = response['update'];
-                    var js = response['js'];
-
-                    // empty file inputs (if exists)
-                    files.forEach(function (f) { f.value = ''; });
+                    var script = response['script'];
 
                     // server-side changes not call watch methods
                     request.vm.$updating = true;
@@ -91,10 +87,10 @@
                         request.vm.$updating = false;
                     });
 
-                    if (js) {
-                        log('>  $eval = ', response['js']);
+                    if (script) {
+                        log('>  $eval = ', script);
                         setTimeout(function () {
-                            new Function(js).call(request.vm);
+                            new Function(script).call(request.vm);
                         })
                     }
 

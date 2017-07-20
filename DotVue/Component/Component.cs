@@ -15,12 +15,23 @@ namespace DotVue
 {
     public class Component
     {
+        #region Json.Net settings
+
         private JsonSerializerSettings _serializeSettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Include,
             ObjectCreationHandling = ObjectCreationHandling.Replace,
-            ContractResolver = VueContractResolver.Instance
+            ContractResolver = CustomContractResolver.Instance
         };
+
+        private JsonSerializer _serialize = new JsonSerializer
+        {
+            NullValueHandling = NullValueHandling.Include,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            ContractResolver = CustomContractResolver.Instance
+        };
+
+        #endregion
 
         public string VPath { get; set; }
         public Type ViewModelType { get; set; }
@@ -227,17 +238,25 @@ namespace DotVue
 
         public void UpdateModel(string data, string props, string method, JToken[] parameters, HttpFileCollection files, TextWriter writer)
         {
-            using (var vm = (ViewModel)Activator.CreateInstance(ViewModelType))
-            {
-                JsonConvert.PopulateObject(data, vm, _serializeSettings);
-                JsonConvert.PopulateObject(props, vm, _serializeSettings);
+            var obj = JObject.Parse(data);
 
+            obj.Merge(JObject.Parse(props));
+
+            var vm = (ViewModel)obj.ToObject(this.ViewModelType);
+
+            try
+            { 
                 if (!string.IsNullOrEmpty(method))
                 {
                     ExecuteMethod(vm, method, parameters, files);
                 }
 
-                RenderUpdate(vm, data, writer);
+                RenderUpdate(vm, obj, writer);
+
+            }
+            finally
+            {
+                vm.Dispose();
             }
         }
 
@@ -294,19 +313,19 @@ namespace DotVue
             ViewModel.Execute(vm, method, pars.ToArray());
         }
 
-        private void RenderUpdate(ViewModel vm, string model, TextWriter writer)
+        private void RenderUpdate(ViewModel vm, JObject original, TextWriter writer)
         {
-            var original = JObject.Parse(model);
-            var current = JObject.FromObject(vm, new JsonSerializer { ContractResolver = VueContractResolver.Instance });
+            var current = JObject.FromObject(vm, _serialize);
+
             var diff = new JObject();
 
             foreach (var item in current)
             {
-                var o = original[item.Key];
+                var orig = original[item.Key];
 
-                if (original[item.Key] == null && item.Value.HasValues == false) continue;
+                if (orig == null && item.Value.HasValues == false) continue;
 
-                if (!JToken.DeepEquals(original[item.Key], item.Value))
+                if (JTokenComparer.Instance.Compare(orig, item.Value) != 0)
                 {
                     diff[item.Key] = item.Value;
                 }
@@ -315,7 +334,7 @@ namespace DotVue
             var output = new JObject
             {
                 { "update", diff },
-                { "js", ViewModel.Script(vm) }
+                { "script", ViewModel.Script(vm) }
             };
 
             using (var w = new JsonTextWriter(writer))

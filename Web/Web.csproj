@@ -74,6 +74,7 @@
     <Content Include="AscxFiles\LayoutContent.ascx" />
     <Content Include="AscxFiles\NProgress.ascx" />
     <Content Include="AscxFiles\DataType.ascx" />
+    <Content Include="AscxFiles\Agenda.ascx" />
     <Content Include="AscxFiles\_NAutoComplete.ascx" />
     <Content Include="AscxFiles\_SimpleLayout.ascx" />
     <Content Include="AscxFiles\Static.ascx" />

@@ -10,9 +10,9 @@ using Newtonsoft.Json.Serialization;
 
 namespace DotVue
 {
-    public class VueContractResolver : DefaultContractResolver
+    internal class CustomContractResolver : DefaultContractResolver
     {
-        public static readonly VueContractResolver Instance = new VueContractResolver();
+        public static readonly CustomContractResolver Instance = new CustomContractResolver();
 
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {

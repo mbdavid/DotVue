@@ -50,6 +50,7 @@
     <Compile Include="Loader\VueLoader.cs" />
     <Compile Include="Loader\ComponentInfo.cs" />
     <Compile Include="Loader\IComponentLoader.cs" />
+    <Compile Include="Utils\JTokenComparer.cs" />
     <Compile Include="ViewModel\EmptyViewModel.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="ViewModel\ViewModel.cs" />
@@ -60,8 +61,8 @@
     <Compile Include="ViewModel\Attributes.cs" />
     <Compile Include="ViewModel\Computed.cs" />
     <Compile Include="ViewModel\JavascriptBuilder.cs" />
-    <Compile Include="ViewModel\JavascriptExpressionVisitor.cs" />
-    <Compile Include="Utils\VueContractResolver.cs" />
+    <Compile Include="Utils\ExprJs.cs" />
+    <Compile Include="Utils\CustomContractResolver.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
