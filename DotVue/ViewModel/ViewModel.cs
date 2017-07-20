@@ -42,7 +42,7 @@ namespace DotVue
         {
             return new Computed
             {
-                Code = JavascriptExpressionVisitor.Resolve(expr),
+                Code = ExprJs.Resolve(expr),
                 Value = (object o) => expr.Compile()
             };
         }

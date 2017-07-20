@@ -26,7 +26,7 @@ namespace DotVue
 
         public JavascriptBuilder Focus(string id)
         {
-            return Code("try {{ var f = document.querySelector('.vue-page-active #{0}'); if (f) {{ f.focus(); }} }} catch(e) {{ }}", id);
+            return Code("try {{ var f = document.querySelector('#{0}'); if (f) {{ f.focus(); }} }} catch(e) {{ }}", id);
         }
 
         public JavascriptBuilder RedirectTo(string url)

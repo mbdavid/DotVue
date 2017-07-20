@@ -22,25 +22,83 @@ namespace DotVue
             ContractResolver = VueContractResolver.Instance
         };
 
+        /// <summary>
+        /// Component virtual path
+        /// </summary>
         public string VPath { get; set; }
+
+        /// <summary>
+        /// ViewModel type class
+        /// </summary>
         public Type ViewModelType { get; set; }
 
-        public string Template { get; set; }
-        public string Style { get; set; }
-        public string Script { get; set; }
+        /// <summary>
+        /// List of css style rules to be loaded when component are loaded
+        /// </summary>
+        public List<string> Styles { get; set; } = new List<string>();
 
-        public Component(string vpath, Type viewModelType, string content)
+        /// <summary>
+        /// Mixin functions to be merged into main vue options
+        /// </summary>
+        public List<string> Scripts { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Component template
+        /// </summary>
+        public string Template { get; set; }
+
+        /// <summary>
+        /// List of component properties (props)
+        /// </summary>
+        public List<string> Props { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Initial data options
+        /// </summary>
+        public JObject Data { get; set; }
+
+        /// <summary>
+        /// List of all methods that will be run as server
+        /// </summary>
+        public List<MethodInfo> Methods { get; set; }
+
+        /// <summary>
+        /// List of all watch methods
+        /// </summary>
+        public List<string> Watch { get; set; } = new List<string>();
+
+        /// <summary>
+        /// List of all fields that are used as computed
+        /// </summary>
+        public List<FieldInfo> Computed { get; set; } = new List<FieldInfo>();
+
+        /// <summary>
+        /// Indicate to use "created" function to server call
+        /// </summary>
+        public bool CreatedHook { get; set; }
+
+        public List<Plugin> Plugins { get; set; } = new List<Plugin>();
+
+        public Component(string vpath, Type viewModelType, string content, List<Plugin> plugins)
         {
             this.VPath = vpath;
             this.ViewModelType = viewModelType;
-            ParseContent(content);
+            this.ParseContent(content);
+            this.Plugins = plugins;
+
+            this.ExtractMetatadata(viewModelType);
+
+            foreach(var p in plugins)
+            {
+                this.ExtractMetatadata(p.GetType());
+            }
         }
 
         #region RenderScript
 
         public void RenderScript(TextWriter writer)
         {
-            using (var vm = (ViewModel)Activator.CreateInstance(ViewModelType))
+            using (var vm = (ViewModel)Activator.CreateInstance(this.ViewModelType))
             {
                 RenderScript(vm, writer);
             }
@@ -53,29 +111,21 @@ namespace DotVue
             writer.Write("//\n");
 
             // add "style" before return Vue object
-            if (!string.IsNullOrEmpty(Style))
+            if (Styles.Count > 0)
             {
                 writer.WriteFormat("Vue.$addStyle('{0}');\n",
-                    Style.EncodeJavascript());
+                    string.Join("", Styles).EncodeJavascript());
             }
 
             writer.Write("return {\n");
 
-            var props = ViewModelType
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.GetCustomAttribute<PropAttribute>() != null)
-                .ToArray();
-
-            if (props.Length > 0)
+            if (this.Props.Count > 0)
             {
-                writer.WriteFormat("  props: [{0}],\n", string.Join(", ", props.Select(x => "'" + x.Name + "'")));
+                writer.WriteFormat("  props: [{0}],\n", string.Join(", ", this.Props.Select(x => "'" + x + "'")));
             }
 
             // only call Created method if created was override in component
-            var created = ViewModelType.GetMethod("OnCreated", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            var oncreated = created.GetBaseDefinition().DeclaringType != created.DeclaringType;
-
-            if (oncreated)
+            if (this.CreatedHook)
             {
                 writer.Write("  created: function() {\n");
                 writer.Write("    this.OnCreated();\n");
@@ -83,23 +133,14 @@ namespace DotVue
             }
 
             // append template string
-            writer.WriteFormat("  template: '{0}',\n", Template.EncodeJavascript());
+            writer.WriteFormat("  template: '{0}',\n", this.Template.EncodeJavascript());
             writer.WriteFormat("  data: function() {{\n    return {0};\n  }},\n", JsonConvert.SerializeObject(vm, _serializeSettings));
 
-            // get methods
-            var methods = ViewModelType
-                .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(x => !x.IsSpecialName)
-                .ToList();
-
-            // include created method
-            if (oncreated) methods.Insert(0, created);
-
-            if (methods.Count > 0)
+            if (this.Methods.Count > 0)
             {
                 writer.Write("  methods: {\n");
 
-                foreach (var m in methods)
+                foreach (var m in this.Methods)
                 {
                     // checks if method contains Script attribute (will run before call $update)
                     var scripts = m.GetCustomAttributes<ScriptAttribute>(true);
@@ -116,62 +157,59 @@ namespace DotVue
                         pre,
                         string.Join(", ", parameters),
                         post.Length > 0 ? "\n          .then(function(vm) { (function() {" + post + "\n          }).call(vm); })" : "",
-                        m == methods.Last() ? "" : ",");
+                        m == this.Methods.Last() ? "" : ",");
                 }
 
                 writer.Write("  },\n");
             }
 
-            var computed = ViewModelType
-                .GetFields(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.FieldType == typeof(Computed))
-                .ToArray();
-
-            if (computed.Length > 0)
+            if (this.Computed.Count > 0)
             {
                 writer.Write("  computed: {\n");
 
-                foreach (var c in computed)
+                foreach (var c in this.Computed)
                 {
                     writer.WriteFormat("    {0}: function() {{\n      return ({1})(this);\n    }}{2}\n",
                         c.Name,
                         ((Computed)c.GetValue(vm)).Code,
-                        c == computed.Last() ? "" : ",");
+                        c == this.Computed.Last() ? "" : ",");
                 }
 
                 writer.Write("  },\n");
             }
 
-            // get all method marked with [Watch] attribute or ends with _Watch
-            var watchs = ViewModelType
-                .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(x => x.Name.EndsWith("_Watch", StringComparison.InvariantCultureIgnoreCase) || x.GetCustomAttribute<WatchAttribute>() != null)
-                .ToArray();
-
-            if (watchs.Length > 0)
+            if (this.Watchs.Count > 0)
             {
                 writer.Write("  watch: {\n");
 
-                foreach (var w in watchs)
+                foreach (var w in this.Watch)
                 {
                     var name = w.GetCustomAttribute<WatchAttribute>()?.Name ?? w.Name.Substring(0, w.Name.LastIndexOf("_"));
 
                     writer.WriteFormat("    {0}: {{\n      handler: function(v, o) {{\n        if (this.$updating) return false;\n        this.{1}(v, o);\n      }},\n      deep: true\n    }}{2}\n",
                         name, 
                         w.Name,
-                        w == watchs.Last() ? "" : ",");
+                        w == this.Watchs.Last() ? "" : ",");
                 }
 
                 writer.Write("  },\n");
             }
 
-            if (!string.IsNullOrEmpty(Script))
+            if (this.Scripts.Count > 0)
             {
-                writer.WriteFormat("  mixins: [(function() {{\n{0}\n  }})() || {{}}],\n",
-                    Script);
+                writer.WriteFormat("  mixins: [\n");
+
+                foreach(var s in this.Scripts)
+                {
+                    writer.WriteFormat("           (function() {{\n{0}\n  }})() || {{}}{1}\n",
+                        s,
+                        s == this.Scripts.Last() ? "" : ",");
+                }
+
+                writer.WriteFormat("  ],");
             }
 
-            writer.WriteFormat("  vpath: '{0}'\n", VPath);
+            writer.WriteFormat("  vpath: '{0}'\n", this.VPath);
             writer.Write("}");
         }
 
@@ -203,8 +241,11 @@ namespace DotVue
             var script = _reScript.Match(content);
 
             this.Template = RunCompiler("template", template.Groups["lang"].Value, template.Groups["content"].Value);
-            this.Style = RunCompiler("style", style.Groups["lang"].Value, style.Groups["content"].Value);
-            this.Script = RunCompiler("script", script.Groups["lang"].Value, script.Groups["content"].Value);
+            var css = RunCompiler("style", style.Groups["lang"].Value, style.Groups["content"].Value);
+            var code = RunCompiler("script", script.Groups["lang"].Value, script.Groups["content"].Value);
+
+            if (!string.IsNullOrEmpty(css)) this.Styles.Add(css);
+            if (!string.IsNullOrEmpty(code)) this.Scripts.Add(code);
         }
 
         private string RunCompiler(string tag, string lang, string content)
@@ -223,12 +264,55 @@ namespace DotVue
 
         #endregion
 
+        /// <summary>
+        /// Extract from a class metadata to Vue options (methods, watch, data, computed) and add to class variables
+        /// </summary>
+        private void ExtractMetatadata(Type type)
+        {
+            // add all props
+            this.Props.AddRange(type
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.GetCustomAttribute<PropAttribute>() != null)
+                .Select(x => x.Name));
+
+            // only call Created method if created was override in component
+            var created = type.GetMethod("OnCreated", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var oncreated = created.GetBaseDefinition().DeclaringType != created.DeclaringType;
+
+            // add to methods to render
+            if (oncreated)
+            {
+                this.CreatedHook = true;
+                this.Methods.Add(created);
+            }
+
+            // get all public methods
+            this.Methods.AddRange(type
+                .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(x => !x.IsSpecialName));
+
+            // get all computed
+            this.Computed.AddRange(type
+                .GetFields(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.FieldType == typeof(Computed)));
+
+            // get all watch variables (finish as _Watch or marked with Watch attribute)
+            this.Watch.AddRange(type
+                .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+                .Where(x => x.Name.EndsWith("_Watch", StringComparison.InvariantCultureIgnoreCase) || x.GetCustomAttribute<WatchAttribute>() != null)
+                .Select(x => x.Name));
+        }
+
         #region Update Model
 
         public void UpdateModel(string data, string props, string method, JToken[] parameters, HttpFileCollection files, TextWriter writer)
         {
             using (var vm = (ViewModel)Activator.CreateInstance(ViewModelType))
             {
+                var o = new JObject();
+
+                
+
                 JsonConvert.PopulateObject(data, vm, _serializeSettings);
                 JsonConvert.PopulateObject(props, vm, _serializeSettings);
 
@@ -315,7 +399,7 @@ namespace DotVue
             var output = new JObject
             {
                 { "update", diff },
-                { "js", ViewModel.Script(vm) }
+                { "script", ViewModel.Script(vm) }
             };
 
             using (var w = new JsonTextWriter(writer))
