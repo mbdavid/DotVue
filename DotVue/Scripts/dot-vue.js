@@ -101,8 +101,23 @@
                 var form = new FormData();
 
                 form.append('method', request.name);
-                form.append('data', JSON.stringify(request.vm.$data || {}));
                 form.append('props', JSON.stringify(request.vm.$props || {}));
+
+                // add data (check if has local properties)
+                if (request.vm.$options.local.length == 0) {
+                    form.append('data', JSON.stringify(request.vm.$data || {}));
+                }
+                else {
+                    // create a simple copy
+                    var copy = Object.assign({}, request.vm.$data);
+
+                    // and remove local propertis before send to server
+                    request.vm.$options.local.forEach(function (key) {
+                        delete copy[key];
+                    });
+
+                    form.append('data', JSON.stringify(copy));
+                }
 
                 // upload file
                 request.params.forEach(function (value, index, arr) {

@@ -11,12 +11,12 @@ namespace DotVue
 {
     public class ViewModel : IDisposable
     {
-        private JavascriptBuilder _scripts = new JavascriptBuilder();
+        private JavascriptBuilder _script = new JavascriptBuilder();
 
         /// <summary>
         /// Get instance of Javascript builder to be run after update/create vue instance
         /// </summary>
-        protected JavascriptBuilder Scripts { get { return _scripts; } }
+        protected JavascriptBuilder ClientScript { get { return _script; } }
 
         /// <summary>
         /// In page call during initialize. In component, made ajax call when component are created
@@ -62,7 +62,7 @@ namespace DotVue
 
         internal static string Script(ViewModel vm)
         {
-            return vm._scripts.ToString();
+            return vm._script.ToString();
         }
 
         internal static void Execute(ViewModel vm, MethodInfo method, object[] parameters)

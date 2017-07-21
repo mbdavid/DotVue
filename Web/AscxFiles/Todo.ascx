@@ -7,7 +7,7 @@
         public string FilterText { get; set; } = "";
         public List<Todo> Items { get; set; } = new List<Todo>();
 
-        public Computed Filtered = Resolve<ComponentVM>(x => x.Items.Where(z => z.Text.Contains(x.FilterText)));
+        public Computed Filtered = Resolve<ComponentVM>(x => x.Items.Where(z => z.Text.ToUpper().Contains(x.FilterText.ToUpper())));
 
         protected override void OnCreated()
         {
@@ -19,7 +19,7 @@
         {
             Items.Add(new Todo { Text = CurrentText, Done = false });
             CurrentText = "";
-            JS.Code("this.$refs.input.focus();");
+            ClientScript.Code("this.$refs.input.focus();");
         }
 
         public void Remove(int index)

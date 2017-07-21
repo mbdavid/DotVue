@@ -182,6 +182,16 @@ namespace DotVue
                     Script);
             }
 
+            // add client-only properties
+            var locals = this.ViewModelType
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.GetCustomAttribute<LocalAttribute>() != null)
+                .Select(x => "'" + x.Name + "'")
+                .ToArray();
+
+            writer.WriteFormat("  local: [{0}],\n", string.Join(", ", locals));
+
+            // add vpath to options
             writer.WriteFormat("  vpath: '{0}'\n", VPath);
             writer.Write("}");
         }

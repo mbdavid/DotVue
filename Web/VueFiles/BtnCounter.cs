@@ -22,7 +22,7 @@ namespace Web.VueFiles
         {
             System.Threading.Thread.Sleep(1000);
             Number++;
-            Scripts.Emit("inc", seq);
+            ClientScript.Emit("inc", seq);
         }
     }
 }

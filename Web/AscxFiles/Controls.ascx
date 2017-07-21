@@ -262,6 +262,11 @@
                 .ToArray();
         }
 
+        public void Value1_Watch(Tuple<string, string> s)
+        {
+            ClientScript.ConsoleLog("Value1 was changed = (" + s?.Item2 + ", " + s?.Item1 + ")");
+        }
+
     }
 
 </script>
@@ -270,7 +275,7 @@
     <div>
         <p>Autcomplete:</p>
 
-        <n-auto-complete prop="Item1" v-model="Value1" :items="Results1" @query="QueryData">
+        <n-auto-complete prop="Item1" v-model="Value1" :items="Results1" @query="QueryData" placeholder="Countries">
             <template scope="s">
                 <div style="float: left;">{{ s.item.Item1 }}</div>
                 <div style="float:right">{{ s.item.Item2 }}</div>
@@ -285,15 +290,3 @@
 
 
 </template>
-<script>
-
-    return {
-        watch: {
-            'Value1': function(v) {
-                console.warn('changed: ', v == null ? 'null' : v.Item1);
-            }
-        }
-    }
-</script>
-<style>
-</style>

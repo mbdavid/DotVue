@@ -1,9 +1,4 @@
 ﻿<%@ Control Language="C#" %>
-<markdown>
-# Document
-- Item 1
-- Item 2
-</markdown>
 <script runat="server">
 
     public class ComponentVM : ViewModel
@@ -35,7 +30,7 @@
 
         <input v-model.number="DecimalValue" type="text" /><br />
         <input v-model="BoolValue" type="checkbox" /><br />
-        <input-date v-model="DateValue" @mouseover="Post()" /><br />
+        <input v-model="DateValue" type="date" /><br />
 
         <button @click="Post()">Post</button>
 

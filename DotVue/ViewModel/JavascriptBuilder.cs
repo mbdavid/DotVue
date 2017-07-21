@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 namespace DotVue
 {
     /// <summary>
-    /// Javascript builder class
+    /// Javascript builder class. Use this call to create extensions in your project with specific javascript code
     /// </summary>
     public class JavascriptBuilder
     {

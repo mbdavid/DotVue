@@ -62,10 +62,10 @@ namespace DotVue
             catch (HttpCompileException ex)
             {
                 var html = ex.GetHtmlErrorMessage();
-                var re = new Regex(@"<body[^>]*>\s*(?<content>[\s\S]*?)\s*<\/body>");
-                var content = re.Match(html).Groups["content"];
+                var re = new Regex(@"<pre[^>]*>\s*(?<content>[\s\S]*?)\s*<\/pre>");
+                var code = re.Match(html).Groups["content"].Value;
 
-                return new Component(vpath, typeof(EmptyViewModel), "<template><div>" + content + "</div></template>");
+                return new Component(vpath, typeof(EmptyViewModel), string.Format("<template><div><h3 style='color:#800000;'><i>{0}</i></h3><pre style='background-color: #FFFFCC'>{1}</pre></div></template>", ex.Message, code));
             }
             catch (HttpException)
             {

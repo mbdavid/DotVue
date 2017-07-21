@@ -56,4 +56,11 @@ namespace DotVue
             Name = name;
         }
     }
+
+    /// <summary>
+    /// Define property as client only data, do not send from client to server. Must be initialized with "null" in server.
+    /// </summary>
+    public class LocalAttribute : Attribute
+    {
+    }
 }

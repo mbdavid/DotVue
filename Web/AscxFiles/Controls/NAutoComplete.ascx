@@ -130,7 +130,7 @@
         background-color: white;
     }
 
-    .n-auto-complete.modal > input {
+    .n-auto-complete > input {
         width: 100%;
     }
 

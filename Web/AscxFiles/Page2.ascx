@@ -17,13 +17,13 @@
 
         public void query_Watch()
         {
-            JS.ConsoleLog("Watch on query from Page2");
+            ClientScript.ConsoleLog("Watch on query from Page2");
             OnCreated();
         }
 
         public void ShowQuery()
         {
-            JS.Alert("ID = " + Id);
+            ClientScript.Alert("ID = " + Id);
         }
 
         public void Inc()

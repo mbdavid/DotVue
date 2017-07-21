@@ -95,7 +95,7 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 
 # TODO
 
-- Add more control over Component (possible to create by-hand, not only by ViewModelType class)
+- Add more control over Component
     - JObject as model
     - Template
     - Scripts, Styles (many tags)
@@ -107,6 +107,8 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
     Plugins are a simple way to extend a component without touch on original component. Possible to add methods, scripts and section inside template (when template offers %section% to recive more HTML)
     - Section %form1%, %toolbar%
     - Plugin class pipe-line on execution
+    - Load plugins by same ILoader
+    - Check plugin inside Plugin by override method `bool Install(string name)`
     
 - Support for mobile/tablet templates/scripts/styles
     - <template target="mobile"> (mobile, tablet, desktop)

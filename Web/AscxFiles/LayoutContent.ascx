@@ -7,7 +7,7 @@
 
         public void Save()
         {
-            JS.Alert("Save inside content");
+            ClientScript.Alert("Save inside content");
         }
     }
 
