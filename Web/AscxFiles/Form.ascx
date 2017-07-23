@@ -3,11 +3,13 @@
 
     public class ComponentVM : ViewModel
     {
+        public int? Id { get; set; }
         public string Name { get; set; }
         public int Age { get; set; } = 0;
 
         public void Save()
         {
+            Id = DateTime.Now.Second;
             ClientScript.Alert("Save from Component");
         }
     }
@@ -29,10 +31,13 @@
             </tr>
             <tr>
                 <td>Age</td>
-                <td><input type="number" v-model="Age" /></td>
+                <td><input type="text" v-model.number="Age" size="4" /></td>
             </tr>
             %form%
         </table>
+
+        <pre>{{ $data }}</pre>
+
     </div>
 </template>
 

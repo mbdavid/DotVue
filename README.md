@@ -96,11 +96,11 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 # TODO
 
 - Change Plugin to Extend/Extension?
-- Discover + Discover with extensions
-- cache from Ascx files
+- cache from Ascx files when #if !DEBUG
 - ViewModel.Data ? Add ViewModel.Request ?
-
+- Add static + .vue loader
 - ComponentInfo + ExtendInfo + ViewModelExtend (+ Component)
+- To think: Maybe Plugins works only with typed view models (doesnt work in ascx) [need .net reference, need viewmodel]
 
 - Tags parser 
     
