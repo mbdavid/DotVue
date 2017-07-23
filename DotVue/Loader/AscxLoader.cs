@@ -23,16 +23,33 @@ namespace DotVue
 
             foreach (var file in files)
             {
-                yield return new ComponentInfo
-                {
-                    Name = Regex.Replace(Path.GetFileNameWithoutExtension(file), "^_+", ""),
-                    VPath = file.Substring(path.Length - 1, file.Length - path.Length - ext.Length + 1).Replace('\\', '/') + ".vue"
-                };
+                var name = Regex.Replace(Path.GetFileNameWithoutExtension(file), "^_+", "");
+                var vpath = file.Substring(path.Length - 1, file.Length - path.Length - ext.Length + 1).Replace('\\', '/') + ".vue";
+
+                // if name starts with $ is a plugin
+                if (name.StartsWith("$")) continue;
+
+                yield return new ComponentInfo(name, vpath);
             }
         }
 
-        public Component Load(HttpContext context, string vpath)
+        public IEnumerable<string> Plugins(HttpContext context, string componentName)
         {
+            var ext = ".ascx";
+            var path = context.Server.MapPath("~/");
+            var files = Directory.GetFiles(path, "$" + componentName + "_*" + ext, SearchOption.AllDirectories);
+
+            foreach (var file in files)
+            {
+                var vpath = file.Substring(path.Length - 1, file.Length - path.Length - ext.Length + 1).Replace('\\', '/') + ".vue";
+
+                yield return vpath;
+            }
+        }
+
+        public ComponentInfo Load(HttpContext context, string vpath, bool includeContent)
+        {
+            var name = Regex.Replace(Path.GetFileNameWithoutExtension(vpath), "^_+", "");
             var ascx = "~/" + 
                 vpath.Substring(1, vpath.Length - Path.GetExtension(vpath).Length - 1) +
                 ".ascx";
@@ -43,21 +60,24 @@ namespace DotVue
                 var content = new StringBuilder();
                 var control = loader.LoadControl(ascx);
 
-                using (var sw = new StringWriter(content))
-                {
-                    using (var w = new HtmlTextWriter(sw))
-                    {
-                        control.RenderControl(w);
-                    }
-                }
-
                 // get viewmodel class type
-                var viewModelType = control.GetType()
+                var viewModel = control.GetType()
                     .GetNestedTypes()
                     .Where(x => typeof(ViewModel).IsAssignableFrom(x))
                     .FirstOrDefault() ?? typeof(EmptyViewModel);
 
-                return new Component(vpath, viewModelType, content.ToString());
+                if (includeContent)
+                {
+                    using (var sw = new StringWriter(content))
+                    {
+                        using (var w = new HtmlTextWriter(sw))
+                        {
+                            control.RenderControl(w);
+                        }
+                    }
+                }
+
+                return new ComponentInfo(name, vpath, viewModel, content.ToString());
             }
             catch (HttpCompileException ex)
             {
@@ -65,7 +85,8 @@ namespace DotVue
                 var re = new Regex(@"<pre[^>]*>\s*(?<content>[\s\S]*?)\s*<\/pre>");
                 var code = re.Match(html).Groups["content"].Value;
 
-                return new Component(vpath, typeof(EmptyViewModel), string.Format("<template><div><h3 style='color:#800000;'><i>{0}</i></h3><pre style='background-color: #FFFFCC'>{1}</pre></div></template>", ex.Message, code));
+                return new ComponentInfo(name, vpath, typeof(EmptyViewModel),
+                    string.Format("<template><div><h3 style='color:#800000;'><i>{0}</i></h3><pre style='background-color: #FFFFCC'>{1}</pre></div></template>", ex.Message, code));
             }
             catch (HttpException)
             {

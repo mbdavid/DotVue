@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DotVue
 {
-    internal static class Extensions
+    internal static class StringExtensions
     {
         public static string EncodeJavascript(this string str, char stringDefinition = '\'')
         {
@@ -34,11 +34,6 @@ namespace DotVue
 
                 return sb.ToString();
             }
-        }
-
-        public static void WriteFormat(this TextWriter writer, string format, params object[] args)
-        {
-            writer.Write(string.Format(format, args));
         }
 
         public static string CamelCase(this string str)

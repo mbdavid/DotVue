@@ -9,25 +9,20 @@ namespace DotVue
 {
     public class Handler : IHttpHandler
     {
-        /// <summary>
-        /// Define custom vue file loader
-        /// </summary>
-        public static List<IComponentLoader> Loaders { get; private set; } = new List<IComponentLoader>()
-        {
-            new AscxLoader(),
-            new StaticLoader()
-        };
-
         public bool IsReusable { get { return false; } }
 
         public void ProcessRequest(HttpContext context)
         {
-            var path = context.Request.FilePath;
-            var isBootstrap = path.EndsWith("/bootstrap.vue");
-            var isLoad = context.Request.HttpMethod == "GET";
-            var isPost = context.Request.HttpMethod == "POST";
+            var request = context.Request;
+            var response = context.Response;
 
-            context.Response.ContentType = "text/javascript";
+            var path = request.FilePath;
+            var isBootstrap = path.EndsWith("/bootstrap.vue");
+            var isLoad = request.HttpMethod == "GET";
+            var isPost = request.HttpMethod == "POST";
+            var output = response.Output;
+
+            response.ContentType = "text/javascript";
 
             if (isBootstrap)
             {
@@ -35,61 +30,62 @@ namespace DotVue
                 typeof(Handler)
                     .Assembly
                     .GetManifestResourceStream("DotVue.Scripts.dot-vue.js")
-                    .CopyTo(context.Response.OutputStream);
+                    .CopyTo(response.OutputStream);
 
-                var discover = context.Request.QueryString["discover"];
+                var discover = request.QueryString["discover"];
 
                 if (string.IsNullOrEmpty(discover)) return;
 
-                context.Response.Output.Write("\n\n//\n");
-                context.Response.Output.Write("// Registering Vue Components\n");
-                context.Response.Output.Write("//");
+                output.Write("\n\n//\n");
+                output.Write("// Registering Vue Components\n");
+                output.Write("//");
 
                 // register all components with async load
-                foreach (var loader in Loaders)
+                foreach (var loader in Config.Instance.Loaders)
                 {
-                    context.Response.Output.Write("\n\n// Loader: " + loader.GetType().Name);
+                    output.Write("\n\n// Loader: " + loader.GetType().Name);
 
                     foreach (var c in loader.Discover(context))
                     {
-                        context.Response.Output.Write("\nVue.component('{0}', Vue.$loadComponent(", c.Name);
+                        output.Write("\nVue.component('{0}', Vue.$loadComponent(", c.Name);
 
                         if (discover == "sync")
                         {
-                            var component = loader.Load(context, c.VPath);
-                            context.Response.Output.Write("function() {\n");
-                            component.RenderScript(context.Response.Output);
-                            context.Response.Output.Write("}");
+                            var component = loader.Load(context, c.VPath, true);
+                            var plugins = loader.Plugins(context, component.Name)
+                                .Select(x => loader.Load(context, x, true))
+                                .Where(x => Config.Instance.Install(context, component.Name, x.Name));
+
+                            output.Write("function() {\n");
+                            new Component(component, plugins).RenderScript(output);
+                            output.Write("}");
                         }
                         else // async
                         {
-                            context.Response.Output.WriteFormat("'{0}'", c.VPath);
+                            output.WriteFormat("'{0}'", c.VPath);
                         }
 
-                        context.Response.Output.Write("));");
+                        output.Write("));");
                     }
                 }
             }
             else if(isLoad)
             {
                 // render component script
-                Load(context, path)
-                    .RenderScript(context.Response.Output);
+                this.Load(context, path, true)
+                    .RenderScript(output);
             }
             else if(isPost)
             {
                 // execute component update
-                var request = context.Request;
-                var response = context.Response;
-
                 var data = request.Form["data"];
                 var props = request.Form["props"];
                 var method = request.Form["method"];
                 var parameters = JArray.Parse(request.Form["params"]).ToArray();
 
-                var component = Load(context, path);
+                var component = this.Load(context, path, false);
 
-                component.UpdateModel(data, props, method, parameters, request.Files, response.Output);
+                component.UpdateModel(data, props, method, parameters, request.Files, output);
 
                 response.ContentType = "text/json";
             }
@@ -98,16 +94,24 @@ namespace DotVue
         /// <summary>
         /// Load component from any loaders and cache result
         /// </summary>
-        private Component Load(HttpContext context, string path)
+        private Component Load(HttpContext context, string vpath, bool includeContent)
         {
-            foreach(var l in Loaders)
+            foreach(var loader in Config.Instance.Loaders)
             {
-                var c = l.Load(context, path);
+                var component = loader.Load(context, vpath, includeContent);
 
-                if(c != null) return c;
+                if(component != null)
+                {
+                    var plugins = loader
+                        .Plugins(context, component.Name)
+                        .Select(x => loader.Load(context, x, includeContent))
+                        .Where(x => Config.Instance.Install(context, component.Name, x.Name));
+
+                    return new Component(component, plugins);
+                }
             }
 
-            throw new HttpException("Vue component [" + path + "] not found");
+            throw new HttpException("Vue component [" + vpath + "] not found");
         }
     }
 }

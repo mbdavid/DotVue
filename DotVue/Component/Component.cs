@@ -15,78 +15,65 @@ namespace DotVue
 {
     public class Component
     {
-        #region Json.Net settings
+        #region Static Setup
 
-        private JsonSerializerSettings _serializeSettings = new JsonSerializerSettings
-        {
-            NullValueHandling = NullValueHandling.Include,
-            ObjectCreationHandling = ObjectCreationHandling.Replace,
-            ContractResolver = CustomContractResolver.Instance
-        };
+        internal static Action<Config> RunSetup { get; private set; }
 
-        private JsonSerializer _serialize = new JsonSerializer
+        public static void Setup(Action<Config> c)
         {
-            NullValueHandling = NullValueHandling.Include,
-            ObjectCreationHandling = ObjectCreationHandling.Replace,
-            ContractResolver = CustomContractResolver.Instance
-        };
+            RunSetup = c;
+        }
 
         #endregion
 
-        public string VPath { get; set; }
-        public Type ViewModelType { get; set; }
+        // each component support multiples component definitions
+        private List<ComponentInfo> _components = new List<ComponentInfo>();
 
-        public string Template { get; set; }
-        public string Style { get; set; }
-        public string Script { get; set; }
+        // but only with a single vpath
+        private string _vpath;
 
-        public Component(string vpath, Type viewModelType, string content)
+        internal Component(ComponentInfo component, IEnumerable<ComponentInfo> plugins)
         {
-            this.VPath = vpath;
-            this.ViewModelType = viewModelType;
-            ParseContent(content);
+            _vpath = component.VPath;
+            _components.Add(component);
+            _components.AddRange(plugins);
         }
 
         #region RenderScript
 
         public void RenderScript(TextWriter writer)
         {
-            using (var vm = (ViewModel)Activator.CreateInstance(ViewModelType))
-            {
-                RenderScript(vm, writer);
-            }
+            var def = new ComponentDefinition();
+
+            // extrar definition from each component adding all in a single definition instance
+            _components.ForEach(c => def.ExtractMetadata(c.ViewModel, c.Content));
+
+            // render Vue script initializer
+            this.RenderScript(def, writer);
         }
 
-        private void RenderScript(ViewModel vm, TextWriter writer)
+        private void RenderScript(ComponentDefinition def, TextWriter writer)
         {
             writer.Write("//\n");
-            writer.WriteFormat("// Component: \"{0}\"\n", VPath);
+            writer.WriteFormat("// Component: \"{0}\"\n", _vpath);
             writer.Write("//\n");
 
             // add "style" before return Vue object
-            if (!string.IsNullOrEmpty(Style))
+            if (def.Styles.Count > 0)
             {
                 writer.WriteFormat("Vue.$addStyle('{0}');\n",
-                    Style.EncodeJavascript());
+                    string.Join("", def.Styles.Select(x => x.EncodeJavascript())));
             }
 
             writer.Write("return {\n");
 
-            var props = ViewModelType
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.GetCustomAttribute<PropAttribute>() != null)
-                .ToArray();
-
-            if (props.Length > 0)
+            if (def.Props.Count > 0)
             {
-                writer.WriteFormat("  props: [{0}],\n", string.Join(", ", props.Select(x => "'" + x.Name + "'")));
+                writer.WriteFormat("  props: [{0}],\n", string.Join(", ", def.Props.Select(x => "'" + x + "'")));
             }
 
             // only call Created method if created was override in component
-            var created = ViewModelType.GetMethod("OnCreated", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            var oncreated = created.GetBaseDefinition().DeclaringType != created.DeclaringType;
-
-            if (oncreated)
+            if (def.CreatedHook)
             {
                 writer.Write("  created: function() {\n");
                 writer.Write("    this.OnCreated();\n");
@@ -94,239 +81,221 @@ namespace DotVue
             }
 
             // append template string
-            writer.WriteFormat("  template: '{0}',\n", Template.EncodeJavascript());
-            writer.WriteFormat("  data: function() {{\n    return {0};\n  }},\n", JsonConvert.SerializeObject(vm, _serializeSettings));
+            writer.WriteFormat("  template: '{0}',\n", def.Template.EncodeJavascript());
+            writer.WriteFormat("  data: function() {{\n    return {0};\n  }},\n", JsonConvert.SerializeObject(def.Data, Config.JsonSettings));
 
-            // get methods
-            var methods = ViewModelType
-                .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(x => !x.IsSpecialName)
-                .ToList();
-
-            // include created method
-            if (oncreated) methods.Insert(0, created);
-
-            if (methods.Count > 0)
+            // render methods
+            if (def.Methods.Count > 0)
             {
                 writer.Write("  methods: {\n");
 
-                foreach (var m in methods)
+                foreach (var m in def.Methods)
                 {
-                    // checks if method contains Script attribute (will run before call $update)
-                    var scripts = m.GetCustomAttributes<ScriptAttribute>(true);
-                    var pre = string.Join("", scripts.Where(x => !string.IsNullOrWhiteSpace(x.Pre)).Select(x => "\n      " + x.Pre));
-                    var post = string.Join("", scripts.Where(x => !string.IsNullOrWhiteSpace(x.Post)).Select(x => "\n            " + x.Post));
-
-                    // get all parameters without HttpPostFile parameters
-                    var parameters = m.GetParameters()
-                        .Select(x => x.Name);
+                    var name = m.Key;
+                    var pre = m.Value.Item1;
+                    var post = m.Value.Item2;
+                    var parameters = m.Value.Item3;
 
                     writer.WriteFormat("    {0}: function({1}) {{{2}\n      this.$update(this, '{0}', [{3}]){4};\n    }}{5}\n",
-                        m.Name,
-                        string.Join(", ", m.GetParameters().Select(x => x.Name)),
+                        name,
+                        string.Join(", ", parameters),
                         pre,
                         string.Join(", ", parameters),
                         post.Length > 0 ? "\n          .then(function(vm) { (function() {" + post + "\n          }).call(vm); })" : "",
-                        m == methods.Last() ? "" : ",");
+                        name == def.Methods.Last().Key ? "" : ",");
                 }
 
                 writer.Write("  },\n");
             }
 
-            var computed = ViewModelType
-                .GetFields(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.FieldType == typeof(Computed))
-                .ToArray();
-
-            if (computed.Length > 0)
+            // render def
+            if (def.Computed.Count > 0)
             {
                 writer.Write("  computed: {\n");
 
-                foreach (var c in computed)
+                foreach (var c in def.Computed)
                 {
                     writer.WriteFormat("    {0}: function() {{\n      return ({1})(this);\n    }}{2}\n",
-                        c.Name,
-                        ((Computed)c.GetValue(vm)).Code,
-                        c == computed.Last() ? "" : ",");
+                        c.Key,
+                        c.Value,
+                        c.Key == def.Computed.Last().Key ? "" : ",");
                 }
 
                 writer.Write("  },\n");
             }
 
-            // get all method marked with [Watch] attribute or ends with _Watch
-            var watchs = ViewModelType
-                .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(x => x.Name.EndsWith("_Watch", StringComparison.InvariantCultureIgnoreCase) || x.GetCustomAttribute<WatchAttribute>() != null)
-                .ToArray();
-
-            if (watchs.Length > 0)
+            // render watchs
+            if (def.Watch.Count > 0)
             {
                 writer.Write("  watch: {\n");
 
-                foreach (var w in watchs)
+                foreach (var w in def.Watch)
                 {
-                    var name = w.GetCustomAttribute<WatchAttribute>()?.Name ?? w.Name.Substring(0, w.Name.LastIndexOf("_"));
-
                     writer.WriteFormat("    {0}: {{\n      handler: function(v, o) {{\n        if (this.$updating) return false;\n        this.{1}(v, o);\n      }},\n      deep: true\n    }}{2}\n",
-                        name, 
-                        w.Name,
-                        w == watchs.Last() ? "" : ",");
+                        w.Key, 
+                        w.Value,
+                        w.Key == def.Watch.Last().Key ? "" : ",");
                 }
 
                 writer.Write("  },\n");
             }
 
-            if (!string.IsNullOrEmpty(Script))
+            // render scripts
+            if (def.Scripts.Count > 0)
             {
-                writer.WriteFormat("  mixins: [(function() {{\n{0}\n  }})() || {{}}],\n",
-                    Script);
+                writer.Write("  mixins: [\n");
+
+                foreach(var s in def.Scripts)
+                {
+                    writer.WriteFormat("(function() {{\n{0}\n}})() || {{}}{1}\n",
+                        s,
+                        s == def.Scripts.Last() ? "": ",");
+                }
+
+                writer.Write("  ],\n");
             }
 
-            // add client-only properties
-            var locals = this.ViewModelType
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.GetCustomAttribute<LocalAttribute>() != null)
-                .Select(x => "'" + x.Name + "'")
-                .ToArray();
-
-            writer.WriteFormat("  local: [{0}],\n", string.Join(", ", locals));
+            // render client-only properties
+            writer.WriteFormat("  local: [{0}],\n", string.Join(", ", def.Locals.Select(x => "'" + x + "'")));
 
             // add vpath to options
-            writer.WriteFormat("  vpath: '{0}'\n", VPath);
+            writer.WriteFormat("  vpath: '{0}'\n", _vpath);
             writer.Write("}");
         }
 
         #endregion
 
-        #region Template Parser
-
-        private static Dictionary<string, Func<string, string>> _compilers = new Dictionary<string, Func<string, string>>(StringComparer.InvariantCultureIgnoreCase);
-
-        private static Regex _reTemplate = new Regex(@"<template(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*)\s*<\/template>");
-        private static Regex _reStyle = new Regex(@"<style(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/style>");
-        private static Regex _reScript = new Regex(@"<script(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/script>");
-
-        /// <summary>
-        /// Register new compiler for an tag (template|style|script|[custom]), like: Component.RegisterCompiler('style', 'less', s => LessCompiler.Compile(s));
-        /// </summary>
-        public static void RegisterCompiler(string tag, string lang, Func<string, string> compiler)
-        {
-            if (string.IsNullOrEmpty(lang)) throw new ArgumentNullException(nameof(lang));
-            if (compiler == null) throw new ArgumentNullException(nameof(compiler));
-
-            _compilers[tag + "/" + lang] = compiler;
-        }
-
-        private void ParseContent(string content)
-        {
-            var template = _reTemplate.Match(content);
-            var style = _reStyle.Match(content);
-            var script = _reScript.Match(content);
-
-            this.Template = RunCompiler("template", template.Groups["lang"].Value, template.Groups["content"].Value);
-            this.Style = RunCompiler("style", style.Groups["lang"].Value, style.Groups["content"].Value);
-            this.Script = RunCompiler("script", script.Groups["lang"].Value, script.Groups["content"].Value);
-        }
-
-        private string RunCompiler(string tag, string lang, string content)
-        {
-            if (string.IsNullOrEmpty(lang)) return content;
-
-            Func<string, string> compiler;
-
-            if (_compilers.TryGetValue(tag + "/" + lang, out compiler))
-            {
-                return compiler(content);
-            }
-
-            throw new ArgumentException("Tag " + tag.ToString().ToLower() + " contains a not defined language attribute (" + lang + "). Use Component.RegisterCompiler");
-        }
-
-        #endregion
-
-        #region Update Model
+        #region Update Models
 
         public void UpdateModel(string data, string props, string method, JToken[] parameters, HttpFileCollection files, TextWriter writer)
         {
-            var obj = JObject.Parse(data);
+            // get request json object (data + props)
+            var request = JObject.Parse(data);
+            request.Merge(JObject.Parse(props), Config.MergeSettings);
 
-            obj.Merge(JObject.Parse(props));
+            var vms = new List<ViewModel>();
 
-            var vm = (ViewModel)obj.ToObject(this.ViewModelType);
+            foreach(var c in _components)
+            {
+                // create viewmode instance from request object
+                vms.Add((ViewModel)request.ToObject(c.ViewModel));
+            }
 
             try
-            { 
-                if (!string.IsNullOrEmpty(method))
+            {
+                // initialize final object before check changes
+                var current = new JObject();
+                var scripts = new StringBuilder();
+
+                // initialize viewmodel with current request data
+                vms.ForEach(vm => ViewModel.SetData(vm, current));
+
+                // if has method, call in existing vms
+                this.ExecuteMethod(vms, current, method, parameters, files);
+
+                // merge all scripts
+                vms.ForEach(vm => scripts.Append(ViewModel.Script(vm)));
+
+                // detect changed from original to current data and send back to browser
+                var diff = this.GetDiff(request, current);
+
+                // write changes to writer
+                using (var w = new JsonTextWriter(writer))
                 {
-                    ExecuteMethod(vm, method, parameters, files);
+                    var output = new JObject
+                    {
+                        { "update", diff },
+                        { "script", scripts.ToString() }
+                    };
+                    
+                    output.WriteTo(w);
                 }
-
-                RenderUpdate(vm, obj, writer);
-
             }
             finally
             {
-                vm.Dispose();
+                // dispose all viewmodels
+                vms.ForEach(vm => vm.Dispose());
             }
         }
 
-        private void ExecuteMethod(ViewModel vm, string name, JToken[] parameters, HttpFileCollection files)
+        /// <summary>
+        /// Find a method in all componenets and execute if found
+        /// </summary>
+        private void ExecuteMethod(List<ViewModel> vms, JObject data, string name, JToken[] parameters, HttpFileCollection files)
         {
-            var methods = ViewModelType
-                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
-                .Where(x => x.Name == name)
-                .Where(x => x.IsFamily || x.IsPublic)
-                .ToList();
+            MethodInfo method = null;
 
-            if (methods.Count == 0 || methods.Count > 1) throw new SystemException("Method " + name + " do not exists, are not public/protected or has more than one signature");
-
-            var method = methods.First();
-            var pars = new List<object>();
-            var index = 0;
-
-            foreach (var p in method.GetParameters())
+            // iterate from all components
+            for(var i = 0; i < _components.Count; i++)
             {
-                var token = parameters[index++];
+                var vm = vms[i];
+                var methods = _components[i].ViewModel
+                    .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
+                    .Where(x => x.Name == name)
+                    .Where(x => x.IsFamily || x.IsPublic)
+                    .ToList();
 
-                if (p.ParameterType == typeof(HttpPostedFile))
+                // if method not found in this compoenent, go to next compoment (plugin)
+                if (methods.Count > 0)
                 {
-                    var value = ((JValue)token).Value.ToString();
+                    method = methods.First();
 
-                    pars.Add(files.GetMultiple(value).FirstOrDefault());
-                }
-                else if (p.ParameterType == typeof(List<HttpPostedFile>) || p.ParameterType == typeof(IList<HttpPostedFile>))
-                {
-                    var value = ((JValue)token).Value.ToString();
+                    var pars = new List<object>();
+                    var index = 0;
 
-                    pars.Add(new List<HttpPostedFile>(files.GetMultiple(value)));
-                }
-                else if (token.Type == JTokenType.Object)
-                {
-                    var obj = ((JObject)token).ToObject(p.ParameterType);
+                    // convert each parameter as declared method in type
+                    foreach (var p in method.GetParameters())
+                    {
+                        var token = parameters[index++];
 
-                    pars.Add(obj);
-                }
-                else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
-                {
-                    var value = ((JValue)token).Value.ToString();
+                        if (p.ParameterType == typeof(HttpPostedFile))
+                        {
+                            var value = ((JValue)token).Value.ToString();
 
-                    pars.Add(Enum.Parse(p.ParameterType, value));
-                }
-                else
-                {
-                    var value = ((JValue)token).Value;
+                            pars.Add(files.GetMultiple(value).FirstOrDefault());
+                        }
+                        else if (p.ParameterType == typeof(List<HttpPostedFile>) || p.ParameterType == typeof(IList<HttpPostedFile>))
+                        {
+                            var value = ((JValue)token).Value.ToString();
 
-                    pars.Add(Convert.ChangeType(value, p.ParameterType));
+                            pars.Add(new List<HttpPostedFile>(files.GetMultiple(value)));
+                        }
+                        else if (token.Type == JTokenType.Object)
+                        {
+                            var obj = ((JObject)token).ToObject(p.ParameterType);
+
+                            pars.Add(obj);
+                        }
+                        else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
+                        {
+                            var value = ((JValue)token).Value.ToString();
+
+                            pars.Add(Enum.Parse(p.ParameterType, value));
+                        }
+                        else
+                        {
+                            var value = ((JValue)token).Value;
+
+                            pars.Add(Convert.ChangeType(value, p.ParameterType));
+                        }
+                    }
+
+                    // now execute method inside viewmodel
+                    ViewModel.Execute(vm, method, pars.ToArray());
                 }
+
+                data.Merge(JObject.FromObject(vm, Config.JSettings), Config.MergeSettings);
             }
 
-            ViewModel.Execute(vm, method, pars.ToArray());
+            if (method == null) throw new SystemException("Method " + name + " do not exists, are not public/protected or has more than one signature");
         }
 
-        private void RenderUpdate(ViewModel vm, JObject original, TextWriter writer)
+        /// <summary>
+        /// Create a new object with only diff between original viewmodel and new changed viewmodel
+        /// </summary>
+        private JObject GetDiff(JObject original, JObject current)
         {
-            var current = JObject.FromObject(vm, _serialize);
-
+            // create a diff object to capture any change from original to current data
             var diff = new JObject();
 
             foreach (var item in current)
@@ -335,22 +304,14 @@ namespace DotVue
 
                 if (orig == null && item.Value.HasValues == false) continue;
 
+                // use a custom compare function
                 if (JTokenComparer.Instance.Compare(orig, item.Value) != 0)
                 {
                     diff[item.Key] = item.Value;
                 }
             }
 
-            var output = new JObject
-            {
-                { "update", diff },
-                { "script", ViewModel.Script(vm) }
-            };
-
-            using (var w = new JsonTextWriter(writer))
-            {
-                output.WriteTo(w);
-            }
+            return diff;
         }
 
         #endregion

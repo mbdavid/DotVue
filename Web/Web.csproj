@@ -72,12 +72,14 @@
   <ItemGroup>
     <Content Include="AscxFiles\Controls.ascx" />
     <Content Include="AscxFiles\LayoutContent.ascx" />
+    <Content Include="AscxFiles\Form.ascx" />
     <Content Include="AscxFiles\NProgress.ascx" />
     <Content Include="AscxFiles\DataType.ascx" />
     <Content Include="AscxFiles\Error.ascx" />
     <Content Include="AscxFiles\Local.ascx" />
     <Content Include="AscxFiles\Controls\NAutoComplete.ascx" />
     <Content Include="AscxFiles\Layout\SimpleLayout.ascx" />
+    <Content Include="AscxFiles\Plugins\%24Form_SendMail.ascx" />
     <Content Include="AscxFiles\Static.ascx" />
     <Content Include="AscxFiles\Upload.ascx" />
     <Content Include="Global.asax" />

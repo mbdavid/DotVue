@@ -3,8 +3,6 @@
 //
 (function () {
 
-    var _styles = {};
-
     // register vue plugin to server call (vue.$update)
     const DotVue = {
         install: function (Vue, options) {

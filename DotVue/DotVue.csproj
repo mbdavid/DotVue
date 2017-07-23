@@ -46,13 +46,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Component\ComponentDefinition.cs" />
+    <Compile Include="Component\Config.cs" />
     <Compile Include="Loader\StaticLoader.cs" />
     <Compile Include="Loader\VueLoader.cs" />
-    <Compile Include="Loader\ComponentInfo.cs" />
+    <Compile Include="Component\ComponentInfo.cs" />
     <Compile Include="Loader\IComponentLoader.cs" />
     <Compile Include="Utils\JTokenComparer.cs" />
+    <Compile Include="Utils\TextWriterExtensions.cs" />
     <Compile Include="ViewModel\EmptyViewModel.cs" />
-    <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\StringExtensions.cs" />
     <Compile Include="ViewModel\ViewModel.cs" />
     <Compile Include="Loader\AscxLoader.cs" />
     <Compile Include="Component\Component.cs" />
