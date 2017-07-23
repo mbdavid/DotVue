@@ -79,6 +79,7 @@
     <Content Include="AscxFiles\Local.ascx" />
     <Content Include="AscxFiles\Controls\NAutoComplete.ascx" />
     <Content Include="AscxFiles\Layout\SimpleLayout.ascx" />
+    <Content Include="AscxFiles\Plugins\%24Form_Salary.ascx" />
     <Content Include="AscxFiles\Plugins\%24Form_SendMail.ascx" />
     <Content Include="AscxFiles\Static.ascx" />
     <Content Include="AscxFiles\Upload.ascx" />
