@@ -181,6 +181,11 @@ namespace DotVue
                 vms.Add((ViewModel)request.ToObject(c.ViewModel));
             }
 
+            // after initialize all VM, get original JObject into a single object
+            var original = new JObject();
+
+            vms.ForEach(vm => original.Merge(JObject.FromObject(vm, Config.JSettings)));
+
             try
             {
                 // initialize final object before check changes
@@ -197,7 +202,7 @@ namespace DotVue
                 vms.ForEach(vm => scripts.Append(ViewModel.Script(vm)));
 
                 // detect changed from original to current data and send back to browser
-                var diff = this.GetDiff(request, current);
+                var diff = this.GetDiff(original, current);
 
                 // write changes to writer
                 using (var w = new JsonTextWriter(writer))

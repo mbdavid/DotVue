@@ -1,27 +1,34 @@
 ﻿<%@ Control Language="C#" %>
 <script runat="server">
 
-    public class Agenda : ViewModel
+    public class LocalExample : ViewModel
     {
         [Local]
         public List<string> Items { get; set; } = null;
-        public string Title { get; set; }
+
+        public LocalExample()
+        {
+            this.Items = new List<string> { "Constructor", "Values" };
+        }
+
+        protected override void OnCreated()
+        {
+            this.Items = new List<string> { "OnCreated", "Values" };
+        }
 
         public void LoadData()
         {
-            Items = new List<string> { "a", "b", "c" };
-            Title = "This is an title";
+            Items = new List<string> { "New", "Load", "Data" };
         }
 
         public void ChangeData()
         {
-            Items = new List<string> { "x", "y", "z" };
+            Items = new List<string> { "Changed", "Data" };
         }
 
         public void CheckData()
         {
-            ClientScript.Alert("Is Items == null? " + (Items == null) + "\n" +
-                "Is Title == null? " + (Title == null));
+            ClientScript.Alert("Current Items in Server: " + string.Join(", ", Items));
         }
     }
 
@@ -32,7 +39,6 @@
         <button @click="ChangeData()">ChangeData()</button>
         <button @click="CheckData()">CheckData()</button>
         <hr />
-        <h3>Title: {{ Title }}</h3>
         <ul><li v-for="i in Items">{{ i }}</li></ul>
         <hr />
         <pre>{{ $data }}</pre>
