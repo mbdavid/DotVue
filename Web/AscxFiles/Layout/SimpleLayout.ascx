@@ -5,6 +5,11 @@
     {
         [Prop]
         public bool SaveEnabled { get; set; }
+
+        public void LocalTest()
+        {
+            ClientScript.Alert("Is SaveEnabled? = " + SaveEnabled);
+        }
     }
 
 </script>
@@ -14,6 +19,7 @@
         <hr />
         <div class="toolbar">
             <button @click="$emit('save')" :disabled="!SaveEnabled">Save</button>
+            <button @click="LocalTest()">Test if save are enabled</button>
             <slot name="toolbar"></slot>
         </div>
         <hr />

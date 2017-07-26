@@ -62,10 +62,12 @@ namespace DotVue
             // add all props (defined by Prop attribute)
             foreach (var p in type
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.GetCustomAttribute<PropAttribute>() != null)
-                .Select(x => x.Name))
+                .Where(x => x.GetCustomAttribute<PropAttribute>() != null))
             {
-                this.Props.Add(p);
+                // props MUST be read-only to avoid user change it (is passed by caller)
+                //if(p.CanWrite) throw new NotSupportedException("Properties marked as [Prop] must be read-only");
+
+                this.Props.Add(p.Name);
             }
 
             // only call Created method if created was override in component

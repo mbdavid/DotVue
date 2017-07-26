@@ -58,7 +58,7 @@ namespace DotVue
     }
 
     /// <summary>
-    /// Define property as client only data, do not send from client to server. Must be initialized with "null" in server.
+    /// Define property as client only data, do not send from client to server.
     /// </summary>
     public class LocalAttribute : Attribute
     {
