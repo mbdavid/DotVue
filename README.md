@@ -97,16 +97,11 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 
 - Change Plugin to Extend/Extension?
 - cache from Ascx files when #if !DEBUG
-- ViewModel.Data ? Add ViewModel.Request ?
 - Add static + .vue loader
-- ComponentInfo + ExtendInfo + ViewModelExtend (+ Component)
-- To think: Maybe Plugins works only with typed view models (doesnt work in ascx) [need .net reference, need viewmodel]
 - Async/Sync per Loader instance? (controls could be sync, pages async)
-
-- Tags parser 
     
-- Support for mobile/tablet templates/scripts/styles
-    - <template target="mobile"> (mobile, tablet, desktop)
+- Support for mobile/tablet/desktop templates/scripts/styles
+    - <template target="mobile"> target="desktop+mobile"
 
 - Support "import/require" in <script> 
     <script src="http://cdn.net/jquery.js" var="$" /> 

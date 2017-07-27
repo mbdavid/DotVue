@@ -53,6 +53,8 @@
     <Compile Include="Component\ComponentInfo.cs" />
     <Compile Include="Loader\IComponentLoader.cs" />
     <Compile Include="Utils\JTokenComparer.cs" />
+    <Compile Include="Utils\StringScanner.cs" />
+    <Compile Include="Utils\Tag.cs" />
     <Compile Include="Utils\TextWriterExtensions.cs" />
     <Compile Include="ViewModel\EmptyViewModel.cs" />
     <Compile Include="Utils\StringExtensions.cs" />

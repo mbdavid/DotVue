@@ -80,5 +80,22 @@ namespace DotVue
         /// </summary>
         public Func<HttpContext, string, string, bool> Install { get; set; } = (context, component, plugin) => true;
 
+
+        /// <summary>
+        /// Execute compiler function according lang
+        /// </summary>
+        internal string RunCompiler(string lang, string content)
+        {
+            if (string.IsNullOrEmpty(lang)) return content;
+
+            Func<string, string> compiler;
+
+            if (this.Compilers.TryGetValue(lang, out compiler))
+            {
+                return compiler(content);
+            }
+
+            throw new ArgumentException("Compiler for language " + lang + " not defined. Use Component.RegisterCompiler");
+        }
     }
 }

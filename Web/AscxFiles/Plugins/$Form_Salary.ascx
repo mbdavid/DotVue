@@ -13,9 +13,9 @@
 
 </script>
 
-<content for="form">
+<template for="form">
     <tr>
         <td>Salary (plugin)</td>
         <td>$ <input type="text" v-model.number="Salary" size="5" /></td>
     </tr>
-</content>
+</template>

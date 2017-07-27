@@ -22,11 +22,11 @@
 
 </script>
 
-<content for="toolbar">
+<template for="toolbar">
     <button @click="Load()">Load from plugin</button>
-</content>
+</template>
 
-<content for="form">
+<template for="form">
     <tr class="silver">
         <td colspan="2">
             <label>
@@ -35,7 +35,7 @@
             </label>
         </td>
     </tr>
-</content>
+</template>
 
 <style>
     .silver { background-color: #d3d3d3; }

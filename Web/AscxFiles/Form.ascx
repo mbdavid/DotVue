@@ -24,7 +24,7 @@
         </div>
 
         <table class="table">
-            <caption>Form</caption>
+            <caption>Form with DotVue extension support</caption>
             <tr>
                 <td>Name</td>
                 <td><input type="text" v-model="Name" /></td>

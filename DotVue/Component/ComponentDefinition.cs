@@ -24,9 +24,10 @@ namespace DotVue
         /// Returns text template removing %place_holders%
         /// </summary>
         public string Template { get { return Regex.Replace(_template, @"%\w+%", ""); } }
-        public JObject Data { get; private set; } = new JObject();
         public List<string> Scripts { get; private set; } = new List<string>();
         public List<string> Styles { get; private set; } = new List<string>();
+        public List<Tag> Tags { get; set; }
+        public JObject Data { get; private set; } = new JObject();
         public HashSet<string> Props { get; private set; } = new HashSet<string>();
         public Dictionary<string, Tuple<string, string, string[]>> Methods { get; private set; } = new Dictionary<string, Tuple<string, string, string[]>>();
         public Dictionary<string, string> Watch { get; private set; } = new Dictionary<string, string>();
@@ -121,52 +122,34 @@ namespace DotVue
 
         #region ParseContent
 
-        private static Regex _reTemplate = new Regex(@"<template>\s*(?<content>[\s\S]*)\s*<\/template>");
-        private static Regex _reContent = new Regex(@"<content(\s+for=[""'](?<for>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/content>");
-        private static Regex _reStyle = new Regex(@"<style(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/style>");
-        private static Regex _reScript = new Regex(@"<script(\s+lang(uage)?=[""'](?<lang>.*)[""']\s*)?>\s*(?<content>[\s\S]*?)\s*<\/script>");
-
-        private void ParseContent(string content)
+        private void ParseContent(string html)
         {
-            var templateMatch = _reTemplate.Match(content);
-            var styleMatch = _reStyle.Match(content);
-            var scriptMatch = _reScript.Match(content);
-            var contentMatch = _reContent.Match(content);
+            this.Tags = Tag.ParseHtml(html);
 
-            var template = templateMatch.Groups["content"].Value;
-            var style = RunCompiler(styleMatch.Groups["lang"].Value, styleMatch.Groups["content"].Value);
-            var script = RunCompiler(scriptMatch.Groups["lang"].Value, scriptMatch.Groups["content"].Value);
-
-            if (!string.IsNullOrEmpty(template)) _template = template;
-            if (!string.IsNullOrEmpty(style)) this.Styles.Add(style);
-            if (!string.IsNullOrEmpty(script)) this.Scripts.Add(script);
-
-            while (contentMatch.Success)
+            foreach(var tag in this.Tags)
             {
-                var slot = contentMatch.Groups["for"].Value;
-                var html = contentMatch.Groups["content"].Value;
+                var lang = tag.GetAttribute("lang") ?? tag.GetAttribute("language");
+                var content = Config.Instance.RunCompiler(lang, tag.InnerHtml.ToString());
+                var slot = tag.GetAttribute("for");
 
-                _template = Regex.Replace(_template, @"%" + slot + "%", m =>
+                if (tag.Name == "style")
                 {
-                    return html + "%" + slot + "%";
-                });
-
-                contentMatch = contentMatch.NextMatch();
+                    this.Styles.Add(content);
+                }
+                else if (tag.Name == "script")
+                {
+                    this.Scripts.Add(content);
+                }
+                else if(tag.Name == "template")
+                {
+                    _template = slot == null ?
+                        content :
+                        Regex.Replace(_template, @"%" + slot + "%", m =>
+                        {
+                            return content + "%" + slot + "%";
+                        });
+                }
             }
-        }
-
-        private string RunCompiler(string lang, string content)
-        {
-            if (string.IsNullOrEmpty(lang)) return content;
-
-            Func<string, string> compiler;
-
-            if (Config.Instance.Compilers.TryGetValue(lang, out compiler))
-            {
-                return compiler(content);
-            }
-
-            throw new ArgumentException("Compiler for language " + lang + " not defined. Use Component.RegisterCompiler");
         }
 
         #endregion

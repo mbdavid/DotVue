@@ -4,15 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace LiteDB
+namespace DotVue
 {
     /// <summary>
     /// A very simple root tag parser
     /// </summary>
-    public class Tag
+    internal class Tag
     {
         public string Name { get; set; }
-        public Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Attributes { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         public StringBuilder InnerHtml { get; set; } = new StringBuilder();
 
         public string OuterHtml
@@ -25,6 +25,15 @@ namespace LiteDB
                     this.InnerHtml + 
                     "</" + this.Name + ">";
             }
+        }
+
+        public string GetAttribute(string name, string defaultValue = null)
+        {
+            string value;
+
+            if (this.Attributes.TryGetValue(name, out value)) return value;
+
+            return defaultValue;
         }
 
         public static List<Tag> ParseHtml(string html)
@@ -50,7 +59,7 @@ namespace LiteDB
             // discard non tag text before
             if (!s.Match(@"[\s\S]*?<\w+")) return null;
 
-            var tag = new Tag { Name = s.Scan(@"[\s\S]*?<(\w+)", 1) };
+            var tag = new Tag { Name = s.Scan(@"[\s\S]*?<(\w+)", 1).ToLower() };
 
             // read attributes
             while (!s.HasTerminated)
