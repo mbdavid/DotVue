@@ -47,7 +47,7 @@ namespace DotVue
             }
         }
 
-        public ComponentInfo Load(HttpContext context, string vpath, bool includeContent)
+        public ComponentInfo Load(HttpContext context, string vpath)
         {
             var name = Regex.Replace(Path.GetFileNameWithoutExtension(vpath), "^_+", "");
             var ascx = "~/" + 
@@ -66,14 +66,11 @@ namespace DotVue
                     .Where(x => typeof(ViewModel).IsAssignableFrom(x))
                     .FirstOrDefault() ?? typeof(EmptyViewModel);
 
-                if (includeContent)
+                using (var sw = new StringWriter(content))
                 {
-                    using (var sw = new StringWriter(content))
+                    using (var w = new HtmlTextWriter(sw))
                     {
-                        using (var w = new HtmlTextWriter(sw))
-                        {
-                            control.RenderControl(w);
-                        }
+                        control.RenderControl(w);
                     }
                 }
 

@@ -96,8 +96,7 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 # TODO
 
 - Change Plugin to Extend/Extension?
-- cache from Ascx files when #if !DEBUG
-- Add static + .vue loader
+- Add back static + .vue loader
 - Async/Sync per Loader instance? (controls could be sync, pages async)
     
 - Support for mobile/tablet/desktop templates/scripts/styles
@@ -106,4 +105,8 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 - Support "import/require" in <script> 
     <script src="http://cdn.net/jquery.js" var="$" /> 
     
-- Cache discover + loader
+- Cache in Handler (not in loader) when context.IsDebuggingEnabled in context.Cache
+- Remove CompoenentInfo.Name => All componenet are based in vpath only
+- Discover will returns vpaths only - name will be created by filename only
+
+

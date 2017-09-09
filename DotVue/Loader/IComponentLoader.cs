@@ -14,6 +14,6 @@ namespace DotVue
     {
         IEnumerable<ComponentInfo> Discover(HttpContext context);
         IEnumerable<string> Plugins(HttpContext context, string componentName);
-        ComponentInfo Load(HttpContext context, string vpath, bool includeContent);
+        ComponentInfo Load(HttpContext context, string vpath);
     }
 }

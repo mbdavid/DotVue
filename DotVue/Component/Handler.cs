@@ -51,9 +51,9 @@ namespace DotVue
 
                         if (discover == "sync")
                         {
-                            var component = loader.Load(context, c.VPath, true);
+                            var component = loader.Load(context, c.VPath);
                             var plugins = loader.Plugins(context, component.Name)
-                                .Select(x => loader.Load(context, x, true))
+                                .Select(x => loader.Load(context, x))
                                 .Where(x => Config.Instance.Install(context, component.Name, x.Name));
 
                             output.Write("function() {\n");
@@ -72,7 +72,7 @@ namespace DotVue
             else if(isLoad)
             {
                 // render component script
-                this.Load(context, path, true)
+                this.Load(context, path)
                     .RenderScript(output);
             }
             else if(isPost)
@@ -83,7 +83,7 @@ namespace DotVue
                 var method = request.Form["method"];
                 var parameters = JArray.Parse(request.Form["params"]).ToArray();
 
-                var component = this.Load(context, path, false);
+                var component = this.Load(context, path);
 
                 component.UpdateModel(data, props, method, parameters, request.Files, output);
 
@@ -94,17 +94,17 @@ namespace DotVue
         /// <summary>
         /// Load component from any loaders and cache result
         /// </summary>
-        private Component Load(HttpContext context, string vpath, bool includeContent)
+        private Component Load(HttpContext context, string vpath)
         {
             foreach(var loader in Config.Instance.Loaders)
             {
-                var component = loader.Load(context, vpath, includeContent);
+                var component = loader.Load(context, vpath);                
 
                 if(component != null)
                 {
                     var plugins = loader
                         .Plugins(context, component.Name)
-                        .Select(x => loader.Load(context, x, includeContent))
+                        .Select(x => loader.Load(context, x))
                         .Where(x => Config.Instance.Install(context, component.Name, x.Name));
 
                     return new Component(component, plugins);
