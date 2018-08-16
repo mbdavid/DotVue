@@ -10,7 +10,7 @@
         {
             System.Threading.Thread.Sleep(3000);
 
-            Done = "Document done from server: " + DateTime.Now;
+            this.Done = "Document done from server: " + DateTime.Now;
         }
 
         [NProgress, Loading("btn")]

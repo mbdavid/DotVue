@@ -20,16 +20,17 @@
         <div class="toolbar">
             <button @click="$emit('save')" :disabled="!SaveEnabled">Save</button>
             <button @click="LocalTest()">Test if save are enabled</button>
-            <slot name="toolbar"></slot>
+            <span class="slot">
+                <slot name="toolbar"></slot>
+            </span>
         </div>
         <hr />
-        <form>
+        <form class="slot">
             <slot name="form"></slot>
         </form>
     </div>
 </template>
 <style>
-    .simple-layout { border: 2px solid red; margin: 20px; }
-    .simple-layout .toolbar { margin: 10px; border: 1px solid blue; padding: 10px; } 
-    .simple-layout form { margin: 10px; border: 1px solid blue; padding: 10px; } 
+    .simple-layout { border: 2px solid red; margin: 20px; padding: 20px; background-color: #ffbfbf; }
+    .simple-layout .slot { padding: 10px; background-color:white; border: 1px solid red; } 
 </style>

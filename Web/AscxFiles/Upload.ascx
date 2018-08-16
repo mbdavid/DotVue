@@ -5,24 +5,22 @@
     {
         public void Upload(HttpPostedFile file1)
         {
-            ClientScript.Alert(file1?.ContentLength.ToString() ?? "no-file");
+            this.ClientScript.Alert(file1?.ContentLength.ToString() ?? "no-file");
         }
 
         public void Upload2(HttpPostedFile fileA, HttpPostedFile fileB)
         {
-            ClientScript.Alert(fileA.ContentLength + " - " + fileB.ContentLength);
+            this.ClientScript.Alert(fileA.ContentLength + " - " + fileB.ContentLength);
         }
 
         public void UploadMultiple(IList<HttpPostedFile> files)
         {
-            ClientScript.Alert("Total: " + files.Count);
+            this.ClientScript.Alert("Total: " + files.Count);
         }
 
         public void UploadAndParams(int a, IList<HttpPostedFile> files, string b)
         {
-            ClientScript.Alert("Total: " + files.Count + "(a=" + a + "-b=" + b + ")");
-
-            //JS.Code("this.$refs.fileP.value=null");
+            this.ClientScript.Alert("Total: " + files.Count + "(a=" + a + "-b=" + b + ")");
         }
     }
 

@@ -15,7 +15,7 @@ namespace DotVue
     /// </summary>
     public class AscxLoader : IComponentLoader
     {
-        public IEnumerable<ComponentInfo> Discover(HttpContext context)
+        public IEnumerable<ComponentDiscover> Discover(HttpContext context)
         {
             var ext = ".ascx";
             var path = context.Server.MapPath("~/");
@@ -26,24 +26,7 @@ namespace DotVue
                 var name = Regex.Replace(Path.GetFileNameWithoutExtension(file), "^_+", "");
                 var vpath = file.Substring(path.Length - 1, file.Length - path.Length - ext.Length + 1).Replace('\\', '/') + ".vue";
 
-                // if name starts with $ is a plugin
-                if (name.StartsWith("$")) continue;
-
-                yield return new ComponentInfo(name, vpath);
-            }
-        }
-
-        public IEnumerable<string> Plugins(HttpContext context, string componentName)
-        {
-            var ext = ".ascx";
-            var path = context.Server.MapPath("~/");
-            var files = Directory.GetFiles(path, "$" + componentName + "_*" + ext, SearchOption.AllDirectories);
-
-            foreach (var file in files)
-            {
-                var vpath = file.Substring(path.Length - 1, file.Length - path.Length - ext.Length + 1).Replace('\\', '/') + ".vue";
-
-                yield return vpath;
+                yield return new ComponentDiscover(name, vpath);
             }
         }
 

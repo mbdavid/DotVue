@@ -11,18 +11,15 @@ namespace DotVue
 {
     public class ViewModel : IDisposable
     {
-        private JavascriptBuilder _script = new JavascriptBuilder();
-        private JObject _data = null;
-
         /// <summary>
         /// Get instance of Javascript builder to be run after update/create vue instance
         /// </summary>
-        protected JavascriptBuilder ClientScript { get { return _script; } }
+        protected JavascriptBuilder ClientScript { get; private set; } = new JavascriptBuilder();
 
         /// <summary>
-        /// Get request data from client
+        /// Get request data from client. Do not update direct from here - use properties
         /// </summary>
-        protected JObject Data { get { return _data; } }
+        protected JObject Data { get; private set; } = null;
 
         /// <summary>
         /// In page call during initialize. In component, made ajax call when component are created
@@ -61,14 +58,14 @@ namespace DotVue
 
         #region Static caller
 
-        internal static void Created(ViewModel vm)
+        internal static void CallOnCreated(ViewModel vm)
         {
             vm.OnCreated();
         }
 
-        internal static string Script(ViewModel vm)
+        internal static string GetClientScript(ViewModel vm)
         {
-            return vm._script.ToString();
+            return vm.ClientScript.ToString();
         }
 
         internal static void Execute(ViewModel vm, MethodInfo method, object[] parameters)
@@ -78,7 +75,7 @@ namespace DotVue
 
         internal static void SetData(ViewModel vm, JObject data)
         {
-            vm._data = data;
+            vm.Data = data;
         }
 
         #endregion

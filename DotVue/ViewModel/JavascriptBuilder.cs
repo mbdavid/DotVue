@@ -14,26 +14,49 @@ namespace DotVue
 
         public int Length => _sb.Length;
 
+        /// <summary>
+        /// Write text on console log
+        /// </summary>
         public JavascriptBuilder ConsoleLog(string text)
         {
-            return Code("console.log('{0}');", HttpUtility.JavaScriptStringEncode(text));
+            return this.Code("console.log('{0}');", HttpUtility.JavaScriptStringEncode(text));
         }
 
+        /// <summary>
+        /// Show alert message box
+        /// </summary>
         public JavascriptBuilder Alert(string text)
         {
-            return Code("alert('{0}');", HttpUtility.JavaScriptStringEncode(text));
+            return this.Code("alert('{0}');", HttpUtility.JavaScriptStringEncode(text));
         }
 
-        public JavascriptBuilder Focus(string id)
+        /// <summary>
+        /// Set control focus - must define [ref='my-control'] in tag
+        /// </summary>
+        public JavascriptBuilder Focus(string refId)
         {
-            return Code("try {{ var f = document.querySelector('.vue-page-active #{0}'); if (f) {{ f.focus(); }} }} catch(e) {{ }}", id);
+            return this.Code("this.$refs.{0}.focus();", refId);
         }
 
+        /// <summary>
+        /// Update location.href address
+        /// </summary>
         public JavascriptBuilder RedirectTo(string url)
         {
-            return Code("location.href = '{0}';", HttpUtility.JavaScriptStringEncode(url));
+            return this.Code("location.href = '{0}';", HttpUtility.JavaScriptStringEncode(url));
         }
 
+        /// <summary>
+        /// Reload location
+        /// </summary>
+        public JavascriptBuilder Reload()
+        {
+            return this.Code("location.reload();");
+        }
+
+        /// <summary>
+        /// Emit Vue event
+        /// </summary>
         public JavascriptBuilder Emit(string @event, params object[] args)
         {
             var sb = new StringBuilder("this.$emit('" + @event +"'");
@@ -48,6 +71,27 @@ namespace DotVue
             return Code(sb.ToString());
         }
 
+        /// <summary>
+        /// Call any Vue method passing method and optional parameters
+        /// </summary>
+        public JavascriptBuilder Call(string methodName, params object[] args)
+        {
+            var sb = new StringBuilder("this." + methodName + ".call(this");
+
+            foreach (var arg in args)
+            {
+                sb.Append(",");
+                sb.Append(JsonConvert.SerializeObject(arg));
+            }
+
+            sb.Append(");");
+
+            return this.Code(sb.ToString());
+        }
+
+        /// <summary>
+        /// Add javascript code to be run when client Update finish
+        /// </summary>
         public JavascriptBuilder Code(string code)
         {
             _sb.Append(code);

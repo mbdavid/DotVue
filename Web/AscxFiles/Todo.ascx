@@ -11,26 +11,26 @@
 
         protected override void OnCreated()
         {
-            Items.Add(new Todo { Text = "My first demo" });
-            Items.Add(new Todo { Text = "Was done", Done = true });
+            this.Items.Add(new Todo { Text = "My first demo" });
+            this.Items.Add(new Todo { Text = "Was done", Done = true });
         }
 
         public void Add()
         {
-            Items.Add(new Todo { Text = CurrentText, Done = false });
-            CurrentText = "";
-            ClientScript.Code("this.$refs.input.focus();");
+            this.Items.Add(new Todo { Text = CurrentText, Done = false });
+            this.CurrentText = "";
+            this.ClientScript.Focus("");
         }
 
         public void Remove(int index)
         {
-            Items.RemoveAt(index);
+            this.Items.RemoveAt(index);
         }
 
         [Confirm("Clear all items?")]
         public void Clear()
         {
-            Items.Clear();
+            this.Items.Clear();
         }
     }
 

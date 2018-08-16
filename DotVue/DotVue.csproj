@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Component\ComponentDefinition.cs" />
     <Compile Include="Component\Config.cs" />
+    <Compile Include="Loader\ComponentDiscover.cs" />
     <Compile Include="Loader\StaticLoader.cs" />
     <Compile Include="Loader\VueLoader.cs" />
     <Compile Include="Component\ComponentInfo.cs" />

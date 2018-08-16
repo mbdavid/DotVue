@@ -18,17 +18,17 @@
 
         public void LoadData()
         {
-            Items = new List<string> { "New", "Load", "Data" };
+            this.Items = new List<string> { "New", "Load", "Data" };
         }
 
         public void ChangeData()
         {
-            Items = new List<string> { "Changed", "Data" };
+            this.Items = new List<string> { "Changed", "Data" };
         }
 
         public void CheckData()
         {
-            ClientScript.Alert("Current Items in Server: " + string.Join(", ", Items));
+            this.ClientScript.Alert("Current Items in Server: " + string.Join(", ", Items));
         }
     }
 

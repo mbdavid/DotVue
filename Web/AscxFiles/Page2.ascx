@@ -12,23 +12,23 @@
 
         protected override void OnCreated()
         {
-            Id = query.GetValueOrDefault("id");
+            this.Id = query.GetValueOrDefault("id");
         }
 
         public void query_Watch()
         {
-            ClientScript.ConsoleLog("Watch on query from Page2");
-            OnCreated();
+            this.ClientScript.ConsoleLog("Watch on query from Page2");
+            this.OnCreated();
         }
 
         public void ShowQuery()
         {
-            ClientScript.Alert("ID = " + Id);
+            this.ClientScript.Alert("ID = " + Id);
         }
 
         public void Inc()
         {
-            Counter++;
+            this.Counter++;
         }
     }
 

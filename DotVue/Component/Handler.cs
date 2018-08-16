@@ -9,7 +9,7 @@ namespace DotVue
 {
     public class Handler : IHttpHandler
     {
-        public bool IsReusable { get { return false; } }
+        public bool IsReusable => false;
 
         public void ProcessRequest(HttpContext context)
         {
@@ -41,7 +41,7 @@ namespace DotVue
                 output.Write("//");
 
                 // register all components with async load
-                foreach (var loader in Config.Instance.Loaders)
+                foreach (var loader in Config.Loaders)
                 {
                     output.Write("\n\n// Loader: " + loader.GetType().Name);
 
@@ -52,12 +52,9 @@ namespace DotVue
                         if (discover == "sync")
                         {
                             var component = loader.Load(context, c.VPath);
-                            var plugins = loader.Plugins(context, component.Name)
-                                .Select(x => loader.Load(context, x))
-                                .Where(x => Config.Instance.Install(context, component.Name, x.Name));
 
                             output.Write("function() {\n");
-                            new Component(component, plugins).RenderScript(output);
+                            new Component(component).RenderScript(output);
                             output.Write("}");
                         }
                         else // async
@@ -96,18 +93,13 @@ namespace DotVue
         /// </summary>
         private Component Load(HttpContext context, string vpath)
         {
-            foreach(var loader in Config.Instance.Loaders)
+            foreach(var loader in Config.Loaders)
             {
                 var component = loader.Load(context, vpath);                
 
                 if(component != null)
                 {
-                    var plugins = loader
-                        .Plugins(context, component.Name)
-                        .Select(x => loader.Load(context, x))
-                        .Where(x => Config.Instance.Install(context, component.Name, x.Name));
-
-                    return new Component(component, plugins);
+                    return new Component(component);
                 }
             }
 

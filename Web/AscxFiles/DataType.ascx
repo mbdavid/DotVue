@@ -10,10 +10,10 @@
 
         public void Post()
         {
-            DateValue = DateValue.AddYears(-1);
-            DecimalValue = -DecimalValue;
-            BoolValue = !BoolValue;
-            Inner.NewDate = Inner.NewDate.AddYears(1);
+            this.DateValue = DateValue.AddYears(-1);
+            this.DecimalValue = -DecimalValue;
+            this.BoolValue = !BoolValue;
+            this.Inner.NewDate = Inner.NewDate.AddYears(1);
         }
     }
 

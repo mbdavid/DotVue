@@ -18,12 +18,10 @@ namespace DotVue
     /// </summary>
     internal class ComponentDefinition
     {
-        private string _template;
-
         /// <summary>
         /// Returns text template removing %place_holders%
         /// </summary>
-        public string Template { get { return Regex.Replace(_template, @"%\w+%", ""); } }
+        public string Template { get; private set; }
         public List<string> Scripts { get; private set; } = new List<string>();
         public List<string> Styles { get; private set; } = new List<string>();
         public List<Tag> Tags { get; set; }
@@ -38,7 +36,7 @@ namespace DotVue
         /// <summary>
         /// Extract from Type and Content all information to map a server ViewModel class into a Vue component
         /// </summary>
-        public void ExtractMetadata(Type type, string content)
+        public ComponentDefinition(Type type, string content)
         {
             // populate Template/Scripts/Styles
             this.ParseContent(content);
@@ -129,25 +127,19 @@ namespace DotVue
             foreach(var tag in this.Tags)
             {
                 var lang = tag.GetAttribute("lang") ?? tag.GetAttribute("language");
-                var content = Config.Instance.RunCompiler(lang, tag.InnerHtml.ToString());
-                var slot = tag.GetAttribute("for");
+                var content = tag.InnerHtml.ToString();
 
-                if (tag.Name == "style")
+                if (tag.TagName == "style")
                 {
                     this.Styles.Add(content);
                 }
-                else if (tag.Name == "script")
+                else if (tag.TagName == "script")
                 {
                     this.Scripts.Add(content);
                 }
-                else if(tag.Name == "template")
+                else if(tag.TagName == "template")
                 {
-                    _template = slot == null ?
-                        content :
-                        Regex.Replace(_template, @"%" + slot + "%", m =>
-                        {
-                            return content + "%" + slot + "%";
-                        });
+                    this.Template = content;
                 }
             }
         }

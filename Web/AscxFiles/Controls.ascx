@@ -264,7 +264,7 @@
 
         public void Value1_Watch(Tuple<string, string> s)
         {
-            ClientScript.ConsoleLog("Value1 was changed = (" + s?.Item2 + ", " + s?.Item1 + ")");
+            this.ClientScript.ConsoleLog("Value1 was changed = (" + s?.Item2 + ", " + s?.Item1 + ")");
         }
 
     }

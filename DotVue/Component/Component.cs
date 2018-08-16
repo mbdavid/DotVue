@@ -13,40 +13,23 @@ using Newtonsoft.Json.Linq;
 
 namespace DotVue
 {
+    /// <summary>
+    /// Vue component execution
+    /// </summary>
     public class Component
     {
-        #region Static Setup
+        private readonly ComponentInfo _component;
 
-        internal static Action<Config> RunSetup { get; private set; }
-
-        public static void Setup(Action<Config> c)
+        internal Component(ComponentInfo component)
         {
-            RunSetup = c;
-        }
-
-        #endregion
-
-        // each component support multiples component definitions
-        private List<ComponentInfo> _components = new List<ComponentInfo>();
-
-        // but only with a single vpath
-        private string _vpath;
-
-        internal Component(ComponentInfo component, IEnumerable<ComponentInfo> plugins)
-        {
-            _vpath = component.VPath;
-            _components.Add(component);
-            _components.AddRange(plugins);
+            _component = component;
         }
 
         #region RenderScript
 
         public void RenderScript(TextWriter writer)
         {
-            var def = new ComponentDefinition();
-
-            // extrar definition from each component adding all in a single definition instance
-            _components.ForEach(c => def.ExtractMetadata(c.ViewModel, c.Content));
+            var def = new ComponentDefinition(_component.ViewModel, _component.Content);
 
             // render Vue script initializer
             this.RenderScript(def, writer);
@@ -55,7 +38,7 @@ namespace DotVue
         private void RenderScript(ComponentDefinition def, TextWriter writer)
         {
             writer.Write("//\n");
-            writer.WriteFormat("// Component: \"{0}\"\n", _vpath);
+            writer.WriteFormat("// Component: \"{0}\"\n", _component.VPath);
             writer.Write("//\n");
 
             // add "style" before return Vue object
@@ -159,7 +142,7 @@ namespace DotVue
             writer.WriteFormat("  local: [{0}],\n", string.Join(", ", def.Locals.Select(x => "'" + x + "'")));
 
             // add vpath to options
-            writer.WriteFormat("  vpath: '{0}'\n", _vpath);
+            writer.WriteFormat("  vpath: '{0}'\n", _component.VPath);
             writer.Write("}");
         }
 
@@ -171,20 +154,15 @@ namespace DotVue
         {
             // get request json object (data + props)
             var request = JObject.Parse(data);
+
             request.Merge(JObject.Parse(props), Config.MergeSettings);
 
-            var vms = new List<ViewModel>();
+            var vm = (ViewModel)request.ToObject(_component.ViewModel);
 
-            foreach(var c in _components)
-            {
-                // create viewmode instance from request object
-                vms.Add((ViewModel)request.ToObject(c.ViewModel));
-            }
-
-            // after initialize all VM, get original JObject into a single object
+            // after initialize VM, get original JObject into a single object
             var original = new JObject();
 
-            vms.ForEach(vm => original.Merge(JObject.FromObject(vm, Config.JSettings)));
+            original.Merge(JObject.FromObject(vm, Config.JSettings));
 
             try
             {
@@ -193,13 +171,13 @@ namespace DotVue
                 var scripts = new StringBuilder();
 
                 // initialize viewmodel with current request data
-                vms.ForEach(vm => ViewModel.SetData(vm, current));
+                ViewModel.SetData(vm, current);
 
                 // if has method, call in existing vms
-                this.ExecuteMethod(vms, current, method, parameters, files);
+                this.ExecuteMethod(vm, current, method, parameters, files);
 
                 // merge all scripts
-                vms.ForEach(vm => scripts.Append(ViewModel.Script(vm)));
+                scripts.Append(ViewModel.GetClientScript(vm));
 
                 // detect changed from original to current data and send back to browser
                 var diff = this.GetDiff(original, current);
@@ -218,81 +196,76 @@ namespace DotVue
             }
             finally
             {
-                // dispose all viewmodels
-                vms.ForEach(vm => vm.Dispose());
+                // dispose vm
+                vm.Dispose();
             }
         }
 
         /// <summary>
         /// Find a method in all componenets and execute if found
         /// </summary>
-        private void ExecuteMethod(List<ViewModel> vms, JObject data, string name, JToken[] parameters, HttpFileCollection files)
+        private void ExecuteMethod(ViewModel vm, JObject data, string name, JToken[] parameters, HttpFileCollection files)
         {
             MethodInfo method = null;
 
-            // iterate from all components
-            for(var i = 0; i < _components.Count; i++)
+            var methods = _component.ViewModel
+                .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
+                .Where(x => x.Name == name)
+                .Where(x => x.IsFamily || x.IsPublic)
+                .ToList();
+
+            // if method not found in this compoenent, go to next compoment (plugin)
+            if (methods.Count > 0)
             {
-                var vm = vms[i];
-                var methods = _components[i].ViewModel
-                    .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
-                    .Where(x => x.Name == name)
-                    .Where(x => x.IsFamily || x.IsPublic)
-                    .ToList();
+                method = methods.First();
 
-                // if method not found in this compoenent, go to next compoment (plugin)
-                if (methods.Count > 0)
+                var pars = new List<object>();
+                var index = 0;
+
+                // convert each parameter as declared method in type
+                foreach (var p in method.GetParameters())
                 {
-                    method = methods.First();
+                    var token = parameters[index++];
 
-                    var pars = new List<object>();
-                    var index = 0;
-
-                    // convert each parameter as declared method in type
-                    foreach (var p in method.GetParameters())
+                    if (p.ParameterType == typeof(HttpPostedFile))
                     {
-                        var token = parameters[index++];
+                        var value = ((JValue)token).Value.ToString();
 
-                        if (p.ParameterType == typeof(HttpPostedFile))
-                        {
-                            var value = ((JValue)token).Value.ToString();
-
-                            pars.Add(files.GetMultiple(value).FirstOrDefault());
-                        }
-                        else if (p.ParameterType == typeof(List<HttpPostedFile>) || p.ParameterType == typeof(IList<HttpPostedFile>))
-                        {
-                            var value = ((JValue)token).Value.ToString();
-
-                            pars.Add(new List<HttpPostedFile>(files.GetMultiple(value)));
-                        }
-                        else if (token.Type == JTokenType.Object)
-                        {
-                            var obj = ((JObject)token).ToObject(p.ParameterType);
-
-                            pars.Add(obj);
-                        }
-                        else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
-                        {
-                            var value = ((JValue)token).Value.ToString();
-
-                            pars.Add(Enum.Parse(p.ParameterType, value));
-                        }
-                        else
-                        {
-                            var value = ((JValue)token).Value;
-
-                            pars.Add(Convert.ChangeType(value, p.ParameterType));
-                        }
+                        pars.Add(files.GetMultiple(value).FirstOrDefault());
                     }
+                    else if (p.ParameterType == typeof(List<HttpPostedFile>) || p.ParameterType == typeof(IList<HttpPostedFile>))
+                    {
+                        var value = ((JValue)token).Value.ToString();
 
-                    // now execute method inside viewmodel
-                    ViewModel.Execute(vm, method, pars.ToArray());
+                        pars.Add(new List<HttpPostedFile>(files.GetMultiple(value)));
+                    }
+                    else if (token.Type == JTokenType.Object)
+                    {
+                        var obj = ((JObject)token).ToObject(p.ParameterType);
+
+                        pars.Add(obj);
+                    }
+                    else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
+                    {
+                        var value = ((JValue)token).Value.ToString();
+
+                        pars.Add(Enum.Parse(p.ParameterType, value));
+                    }
+                    else
+                    {
+                        var value = ((JValue)token).Value;
+
+                        pars.Add(Convert.ChangeType(value, p.ParameterType));
+                    }
                 }
 
-                data.Merge(JObject.FromObject(vm, Config.JSettings), Config.MergeSettings);
+                // now execute method inside viewmodel
+                ViewModel.Execute(vm, method, pars.ToArray());
             }
 
-            if (method == null) throw new SystemException("Method " + name + " do not exists, are not public/protected or has more than one signature");
+            data.Merge(JObject.FromObject(vm, Config.JSettings), Config.MergeSettings);
+
+            if (method == null) throw new SystemException($"Method {name} do not exists, are not public/protected or has more than one signature");
         }
 
         /// <summary>
