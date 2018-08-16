@@ -33,6 +33,15 @@
 <style>
     @import url("Assets/Styles/base.css");
 
-    .simple-layout { border: 2px solid red; margin: 20px; padding: 20px; background-color: #ffbfbf; }
-    .simple-layout .slot { padding: 10px; background-color:var(--main-bg-color); border: 1px solid red; } 
+    .simple-layout { 
+        border: 2px solid var(--danger); 
+        margin: var(--gutter); 
+        padding: var(--gutter); 
+        background-color: var(--red-50);
+    }
+    .simple-layout .slot { 
+        padding: var(--gutter);
+        background-color:var(--yellow-A100); 
+        border: 1px solid var(--danger);
+    } 
 </style>
