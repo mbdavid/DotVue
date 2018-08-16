@@ -27,6 +27,3 @@
     </simple-layout>
 
 </template>
-<style>
-    .base-layout { border: 1px solid red; }
-</style>

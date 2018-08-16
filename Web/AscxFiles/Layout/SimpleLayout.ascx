@@ -31,6 +31,8 @@
     </div>
 </template>
 <style>
+    @import url("Assets/Styles/base.css");
+
     .simple-layout { border: 2px solid red; margin: 20px; padding: 20px; background-color: #ffbfbf; }
-    .simple-layout .slot { padding: 10px; background-color:white; border: 1px solid red; } 
+    .simple-layout .slot { padding: 10px; background-color:var(--main-bg-color); border: 1px solid red; } 
 </style>
