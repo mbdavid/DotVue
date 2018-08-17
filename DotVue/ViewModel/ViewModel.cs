@@ -36,22 +36,6 @@ namespace DotVue
             method.Invoke(this, parameters);
         }
 
-        #region Computed
-
-        /// <summary>
-        /// Resolve an expression to convert into a computed field
-        /// </summary>
-        public static Computed Resolve<T>(Expression<Func<T, object>> expr) where T : ViewModel
-        {
-            return new Computed
-            {
-                Code = ExprJs.Resolve(expr),
-                Value = (object o) => expr.Compile()
-            };
-        }
-
-        #endregion
-
         public virtual void Dispose()
         {
         }

@@ -8,7 +8,7 @@ using System.Web;
 
 namespace DotVue
 {
-    internal class ExprJs : ExpressionVisitor
+    public class ExprJs : ExpressionVisitor
     {
         private readonly StringBuilder _builder = new StringBuilder();
 

@@ -7,7 +7,8 @@
         public string FilterText { get; set; } = "";
         public List<Todo> Items { get; set; } = new List<Todo>();
 
-        public Computed Filtered = Resolve<ComponentVM>(x => x.Items.Where(z => z.Text.ToUpper().Contains(x.FilterText.ToUpper())));
+        [Computed("x", "x.Items.filter(v => v.Text.toUpperCase().indexOf(x.FilterText.toUpperCase()) >= 0)")]
+        public IEnumerable<Todo> Filtered => this.Items.Where(z => z.Text.ToUpper().Contains(this.FilterText.ToUpper()));
 
         protected override void OnCreated()
         {
@@ -17,9 +18,10 @@
 
         public void Add()
         {
-            this.Items.Add(new Todo { Text = CurrentText, Done = false });
+            //this.Items.Add(new Todo { Text = CurrentText + " (filtered: " + this.Filtered.Value.Count() + ")", Done = false });
+            this.Items.Add(new Todo { Text = CurrentText + " (filtered: " + this.Filtered.Count() + ")", Done = false });
             this.CurrentText = "";
-            this.ClientScript.Focus("");
+            this.ClientScript.Focus("input");
         }
 
         public void Remove(int index)
@@ -43,7 +45,7 @@
 </script>
 <template>
     <div>
-        <h3>Todo List</h3>
+        <h3>Todo List - Server Only</h3>
         <hr />
         <div>
             <input type="text" v-model="CurrentText" @keyup.enter="Add()" autofocus placeholder="Add new Item" ref="input"/>

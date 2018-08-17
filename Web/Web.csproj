@@ -74,7 +74,6 @@
     <Content Include="AscxFiles\Local.ascx" />
     <Content Include="AscxFiles\Controls\NAutoComplete.ascx" />
     <Content Include="AscxFiles\Layout\SimpleLayout.ascx" />
-    <Content Include="AscxFiles\Static.ascx" />
     <Content Include="AscxFiles\Upload.ascx" />
     <Content Include="Global.asax" />
     <Content Include="AscxFiles\Todo.ascx" />

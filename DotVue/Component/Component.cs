@@ -98,7 +98,7 @@ namespace DotVue
 
                 foreach (var c in def.Computed)
                 {
-                    writer.WriteFormat("    {0}: function() {{\n      return ({1})(this);\n    }}{2}\n",
+                    writer.WriteFormat("    {0}: function() {{\n      {1};\n    }}{2}\n",
                         c.Key,
                         c.Value,
                         c.Key == def.Computed.Last().Key ? "" : ",");

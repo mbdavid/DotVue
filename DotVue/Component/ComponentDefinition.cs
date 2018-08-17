@@ -48,14 +48,6 @@ namespace DotVue
 
                 // merge viewModel into current data
                 this.Data.Merge(viewModel);
-
-                // get all computed
-                foreach (var c in type
-                    .GetFields(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(x => x.FieldType == typeof(Computed)))
-                {
-                    this.Computed[c.Name] = ((Computed)c.GetValue(vm)).Code;
-                }
             }
 
             // add all props (defined by Prop attribute)
@@ -67,6 +59,17 @@ namespace DotVue
                 //if(p.CanWrite) throw new NotSupportedException("Properties marked as [Prop] must be read-only");
 
                 this.Props.Add(p.Name);
+            }
+
+
+            // get all computed
+            foreach (var p in type
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.GetCustomAttribute<ComputedAttribute>() != null))
+            {
+                var attr = p.GetCustomAttribute<ComputedAttribute>();
+
+                this.Computed[p.Name] = attr.Code;
             }
 
             // only call Created method if created was override in component

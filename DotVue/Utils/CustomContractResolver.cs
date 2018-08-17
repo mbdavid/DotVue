@@ -16,9 +16,9 @@ namespace DotVue
 
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {
-            // ignore Computed field
+            // ignore Computed property
             var props = base.CreateProperties(type, memberSerialization)
-                .Where(x => x.PropertyType != typeof(Computed))
+                .Where(x => x.AttributeProvider.GetAttributes(typeof(ComputedAttribute), true).Count == 0)
                 .ToList();
 
             // props must be write-only
