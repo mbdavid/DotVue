@@ -60,7 +60,7 @@
                 <span :style="{ 'text-decoration': Item.Done ? 'line-through' : 'none' }" @click="Item.Done = !Item.Done">
                     {{ Item.Text }}
                 </span>
-                <button v-on:click.prevent="Remove(i)" :disabled="Item.Done" type="submit">X</button>
+                <button v-on:click.prevent="Remove(i)" :disabled="Item.Done" v-show="FilterText.length == 0" type="submit">X</button>
             </li>
         </ul>
         <i v-show="Filtered.length != Items.length">

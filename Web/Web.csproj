@@ -74,9 +74,10 @@
     <Content Include="AscxFiles\Local.ascx" />
     <Content Include="AscxFiles\Controls\NAutoComplete.ascx" />
     <Content Include="AscxFiles\Layout\SimpleLayout.ascx" />
+    <Content Include="AscxFiles\TodoClient.ascx" />
     <Content Include="AscxFiles\Upload.ascx" />
     <Content Include="Global.asax" />
-    <Content Include="AscxFiles\Todo.ascx" />
+    <Content Include="AscxFiles\TodoServer.ascx" />
     <Content Include="AscxFiles\Page2.ascx" />
     <Content Include="AscxFiles\Page1.ascx" />
     <Content Include="index.html" />

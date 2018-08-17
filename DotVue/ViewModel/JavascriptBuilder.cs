@@ -55,11 +55,11 @@ namespace DotVue
         }
 
         /// <summary>
-        /// Emit Vue event
+        /// Trigger Vue event for parent component
         /// </summary>
-        public JavascriptBuilder Emit(string @event, params object[] args)
+        public JavascriptBuilder Emit(string eventName, params object[] args)
         {
-            var sb = new StringBuilder("this.$emit('" + @event +"'");
+            var sb = new StringBuilder("this.$emit('" + eventName +"'");
 
             foreach(var arg in args)
             {

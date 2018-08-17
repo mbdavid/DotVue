@@ -28,11 +28,10 @@
             <input type="text" v-model="CurrentText" @keyup.enter="Add()" autofocus placeholder="Add new Item" ref="input"/>
             <button @click="Add()" :disabled="!CurrentText">Add</button>
             <button @click="Clear()">Clear all</button>
-            <input type="text" v-model="FilterText" placeholder="Filter by text" />
         </div>
         <hr />
         <ul>
-            <li v-for="(Item, i) in Filtered">
+            <li v-for="(Item, i) in Items">
                 <input type="checkbox" v-model="Item.Done" />
                 <span :style="{ 'text-decoration': Item.Done ? 'line-through' : 'none' }" @click="Item.Done = !Item.Done">
                     {{ Item.Text }}
@@ -40,9 +39,8 @@
                 <button v-on:click.prevent="Remove(i)" :disabled="Item.Done" type="submit">X</button>
             </li>
         </ul>
-        <i v-show="Filtered.length != Items.length">
-            Showing only {{ Filtered.length }} from {{ Items.length }} items
-        </i>
+        <hr />
+        <button type="button" @click="Save">Save on Server</button>
     </div>
 </template>
 
@@ -50,7 +48,7 @@
     
     return {
         created: function () {
-            this.Items.push({ Text: "My first demo" });
+            this.Items.push({ Text: "My first demo", Done: false });
             this.Items.push({ Text: "Was done", Done: true });
         },
         methods: {
@@ -60,15 +58,10 @@
                 this.$refs.input.focus();
             },
             Remove(index) {
-                this.Items.slice(index, 1)
+                this.Items.splice(index, 1);
             },
             Clear() {
-                this.Items.slice(0);
-            }
-        },
-        computed: {
-            Filtered: function () {
-                return (function(x) { return x.Items.filter(v => v.Text.toUpperCase().indexOf(x.FilterText.toUpperCase()) >= 0); })(this);
+                this.Items.splice(0, this.Items.length);
             }
         }
     };
