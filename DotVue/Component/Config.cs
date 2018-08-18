@@ -20,6 +20,7 @@ namespace DotVue
             NullValueHandling = NullValueHandling.Include,
             ObjectCreationHandling = ObjectCreationHandling.Replace,
             ContractResolver = CustomContractResolver.Instance
+            //DateFormatString = "yyyy-MM-dd"
         };
 
         internal static JsonSerializerSettings JsonSettings = new JsonSerializerSettings
@@ -27,6 +28,7 @@ namespace DotVue
             NullValueHandling = NullValueHandling.Include,
             ObjectCreationHandling = ObjectCreationHandling.Replace,
             ContractResolver = CustomContractResolver.Instance
+            //DateFormatString = "yyyy-MM-dd"
         };
 
         internal static JsonMergeSettings MergeSettings = new JsonMergeSettings

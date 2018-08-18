@@ -44,8 +44,8 @@
 
         <p>Content from page2, content from page2, Content from page2</p>
         <p>Content from page2, content from page2, Content from page2</p>
-        <button @click="ShowQuery()">ShowQuery()</button>
-        <button @click="Inc()">{{ Counter }}</button>
+        <button @click="showQuery()">ShowQuery()</button>
+        <button @click="inc()">{{ counter }}</button>
         <pre>$data: {{ $data }}</pre>
         <pre>$props: {{ $props }}</pre>
     </div>

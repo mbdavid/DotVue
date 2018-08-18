@@ -11,7 +11,7 @@
     <div class="page1">
         <h3>Page 1</h3><hr />
         <p>Content from page1</p>
-        <button @click="Counter++">{{ Counter }}</button>
+        <button @click="counter++">{{ counter }}</button>
 
     </div>
 </template>

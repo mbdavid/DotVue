@@ -18,8 +18,8 @@
         <h1>Simple Layout</h1>
         <hr />
         <div class="toolbar">
-            <button @click="$emit('save')" :disabled="!SaveEnabled">Save</button>
-            <button @click="LocalTest()">Test if save are enabled</button>
+            <button @click="$emit('save')" :disabled="!saveEnabled">Save</button>
+            <button @click="localTest()">Test if save are enabled</button>
             <span class="slot">
                 <slot name="toolbar"></slot>
             </span>

@@ -35,11 +35,11 @@
 </script>
 <template>
     <div>
-        <button @click="LoadData()">LoadData()</button>
-        <button @click="ChangeData()">ChangeData()</button>
-        <button @click="CheckData()">CheckData()</button>
+        <button @click="loadData()">LoadData()</button>
+        <button @click="changeData()">ChangeData()</button>
+        <button @click="checkData()">CheckData()</button>
         <hr />
-        <ul><li v-for="i in Items">{{ i }}</li></ul>
+        <ul><li v-for="i in items">{{ i }}</li></ul>
         <hr />
         <pre>{{ $data }}</pre>
     </div>

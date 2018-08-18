@@ -18,7 +18,7 @@
         <hr />
         <input type="text" v-model="Id" placeholder="Id value" />
 
-        <button type="button" @click="SaveClick()">Save on Server</button>
+        <button type="button" @click="saveClick()">Save on Server</button>
 
     </div>
 

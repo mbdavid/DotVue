@@ -13,10 +13,10 @@
 
 </script>
 <template>
-    <simple-layout @save="Save()" :save-enabled="IsSaveEnabled">
+    <simple-layout @save="save()" :save-enabled="isSaveEnabled">
 
         <template slot="toolbar">
-            <button @click="IsSaveEnabled = !IsSaveEnabled">Toggle</button>
+            <button @click="isSaveEnabled = !isSaveEnabled">Toggle</button>
         </template>
 
         <template slot="form">

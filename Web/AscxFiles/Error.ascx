@@ -13,7 +13,7 @@
 </script>
 <template>
     <div>
-        <button @click="ClickError()">Error in server</button>
+        <button @click="clickError()">Error in server</button>
 
 
     </div>

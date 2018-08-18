@@ -24,9 +24,9 @@
 <template>
     <div class="hidden">
         <h3>Progress bar</h3><hr />
-        {{ Done }}
+        {{ done }}
         <hr />
-        <button @click="Wait(2000)" ref="btn">Click and Wait</button>
+        <button @click="wait(2000)" ref="btn">Click and Wait</button>
         <hr />
         <button @click="finish()">Destroy and Go to Page1</button>
     </div>

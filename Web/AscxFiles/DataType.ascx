@@ -28,11 +28,12 @@
 
         <h3>DateType</h3><hr />
 
-        <input v-model.number="DecimalValue" type="text" /><br />
-        <input v-model="BoolValue" type="checkbox" /><br />
-        <input v-model="DateValue" type="date" /><br />
+        <input v-model.number="decimalValue" type="text" lang="pt-br" /><br />
+        <input v-model="boolValue" type="checkbox" /><br />
+        <input v-model="dateValue" type="date" /><br />
+        <input v-model="inner.newDate" type="date" /><br />
 
-        <button @click="Post()">Post</button>
+        <button @click="post()">Post</button>
 
         <hr />
         <pre>{{ $data }}</pre>

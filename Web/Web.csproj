@@ -67,6 +67,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AscxFiles\Controls.ascx" />
+    <Content Include="AscxFiles\FormInner.ascx" />
+    <Content Include="AscxFiles\FormEmit.ascx" />
     <Content Include="AscxFiles\LayoutContent.ascx" />
     <Content Include="AscxFiles\NProgress.ascx" />
     <Content Include="AscxFiles\DataType.ascx" />

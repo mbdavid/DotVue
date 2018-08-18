@@ -52,14 +52,14 @@ namespace DotVue
 
             if (def.Props.Count > 0)
             {
-                writer.WriteFormat("  props: [{0}],\n", string.Join(", ", def.Props.Select(x => "'" + x + "'")));
+                writer.WriteFormat("  props: [{0}],\n", string.Join(", ", def.Props.Select(x => "'" + x.CamelCase() + "'")));
             }
 
             // only call Created method if created was override in component
             if (def.CreatedHook)
             {
                 writer.Write("  created: function() {\n");
-                writer.Write("    this.OnCreated();\n");
+                writer.Write("    this.onCreated();\n");
                 writer.Write("  },\n");
             }
 
@@ -79,10 +79,11 @@ namespace DotVue
                     var post = m.Value.Item2;
                     var parameters = m.Value.Item3;
 
-                    writer.WriteFormat("    {0}: function({1}) {{{2}\n      this.$update(this, '{0}', [{3}]){4};\n    }}{5}\n",
-                        name,
+                    writer.WriteFormat("    {0}: function({1}) {{{2}\n      this.$update(this, '{3}', [{4}]){5};\n    }}{6}\n",
+                        name.CamelCase(),
                         string.Join(", ", parameters),
                         pre,
+                        name,
                         string.Join(", ", parameters),
                         post.Length > 0 ? "\n          .then(function(vm) { (function() {" + post + "\n          }).call(vm); })" : "",
                         name == def.Methods.Last().Key ? "" : ",");
@@ -99,7 +100,7 @@ namespace DotVue
                 foreach (var c in def.Computed)
                 {
                     writer.WriteFormat("    {0}: function() {{\n      {1};\n    }}{2}\n",
-                        c.Key,
+                        c.Key.CamelCase(),
                         c.Value,
                         c.Key == def.Computed.Last().Key ? "" : ",");
                 }
@@ -115,8 +116,8 @@ namespace DotVue
                 foreach (var w in def.Watch)
                 {
                     writer.WriteFormat("    {0}: {{\n      handler: function(v, o) {{\n        if (this.$updating) return false;\n        this.{1}(v, o);\n      }},\n      deep: true\n    }}{2}\n",
-                        w.Key, 
-                        w.Value,
+                        w.Key.CamelCase(), 
+                        w.Value.CamelCase(),
                         w.Key == def.Watch.Last().Key ? "" : ",");
                 }
 
@@ -139,7 +140,7 @@ namespace DotVue
             }
 
             // render client-only properties
-            writer.WriteFormat("  local: [{0}],\n", string.Join(", ", def.Locals.Select(x => "'" + x + "'")));
+            writer.WriteFormat("  local: [{0}],\n", string.Join(", ", def.Locals.Select(x => "'" + x.CamelCase() + "'")));
 
             // add vpath to options
             writer.WriteFormat("  vpath: '{0}'\n", _component.VPath);

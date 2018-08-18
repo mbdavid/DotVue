@@ -25,22 +25,22 @@
         <h3>Todo List - Client Only - Server only on Save()</h3>
         <hr />
         <div>
-            <input type="text" v-model="CurrentText" @keyup.enter="Add()" autofocus placeholder="Add new Item" ref="input"/>
-            <button @click="Add()" :disabled="!CurrentText">Add</button>
-            <button @click="Clear()">Clear all</button>
+            <input type="text" v-model="currentText" @keyup.enter="add()" autofocus placeholder="Add new Item" ref="input"/>
+            <button @click="add()" :disabled="!currentText">Add</button>
+            <button @click="clear()">Clear all</button>
         </div>
         <hr />
         <ul>
-            <li v-for="(Item, i) in Items">
-                <input type="checkbox" v-model="Item.Done" />
-                <span :style="{ 'text-decoration': Item.Done ? 'line-through' : 'none' }" @click="Item.Done = !Item.Done">
-                    {{ Item.Text }}
+            <li v-for="(item, i) in items">
+                <input type="checkbox" v-model="item.done" />
+                <span :style="{ 'text-decoration': item.done ? 'line-through' : 'none' }" @click="item.done = !item.done">
+                    {{ item.text }}
                 </span>
-                <button v-on:click.prevent="Remove(i)" :disabled="Item.Done" type="submit">X</button>
+                <button v-on:click.prevent="remove(i)" :disabled="item.done" type="submit">X</button>
             </li>
         </ul>
         <hr />
-        <button type="button" @click="Save">Save on Server</button>
+        <button type="button" @click="save">Save on Server</button>
     </div>
 </template>
 
@@ -48,20 +48,20 @@
     
     return {
         created: function () {
-            this.Items.push({ Text: "My first demo", Done: false });
-            this.Items.push({ Text: "Was done", Done: true });
+            this.items.push({ text: "My first demo", done: false });
+            this.items.push({ text: "Was done", done: true });
         },
         methods: {
-            Add() {
-                this.Items.push({ Text: this.CurrentText, Done: false });
-                this.CurrentText = "";
+            add() {
+                this.items.push({ text: this.currentText, done: false });
+                this.currentText = "";
                 this.$refs.input.focus();
             },
-            Remove(index) {
-                this.Items.splice(index, 1);
+            remove(index) {
+                this.items.splice(index, 1);
             },
-            Clear() {
-                this.Items.splice(0, this.Items.length);
+            clear() {
+                this.items.splice(0, this.items.length);
             }
         }
     };
