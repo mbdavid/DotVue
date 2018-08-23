@@ -27,7 +27,7 @@
 
                     if (!_running) nextQueue();
                 });
-            }
+            };
 
             // Execute queue
             function nextQueue() {
@@ -59,6 +59,7 @@
                 var xhr = new XMLHttpRequest();
 
                 xhr.onload = function () {
+
                     if (xhr.status < 200 || xhr.status >= 400) {
                         _queue = [];
                         _running = false;
@@ -89,7 +90,7 @@
                         log('>  $eval = ', script);
                         setTimeout(function () {
                             new Function(script).call(request.vm);
-                        })
+                        });
                     }
 
                     finish();
@@ -102,7 +103,7 @@
                 form.append('props', JSON.stringify(request.vm.$props || {}));
 
                 // add data (check if has local properties)
-                if (request.vm.$options.local.length == 0) {
+                if (request.vm.$options.local.length === 0) {
                     form.append('data', JSON.stringify(request.vm.$data || {}));
                 }
                 else {
@@ -120,7 +121,7 @@
                 // upload file
                 request.params.forEach(function (value, index, arr) {
 
-                    var isFile = value instanceof HTMLInputElement && value.type == 'file';
+                    var isFile = value instanceof HTMLInputElement && value.type === 'file';
 
                     if (isFile) {
                         var name = "files_" + (Math.floor(Math.random() * 899998) + 100000);
@@ -137,7 +138,7 @@
 
                 log('$update ("' + request.name + '") = ', request.params);
 
-                xhr.open('POST', request.vm.$options.vpath, true);
+                xhr.open('POST', request.vm.$options.name + '.vue', true);
                 xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                 xhr.send(form);
             }
@@ -156,20 +157,20 @@
                 }
 
                 head.appendChild(style);
-            }
+            };
 
             // Load async component from current page
-            Vue.$loadComponent = function $loadComponent(vpath) {
+            Vue.$loadComponent = function $loadComponent(name) {
 
-                // if vpath is a function, just return
-                if (typeof vpath === 'function') return vpath();
+                // if name is a function, just execute and return component
+                if (typeof name === 'function') return name();
 
                 return function (resolve, reject) {
                     var xhr = new XMLHttpRequest();
 
                     xhr.onload = function () {
                         if (xhr.status < 200 || xhr.status >= 400) {
-                            alert('Error on load component: ' + vpath);
+                            alert('Error on load component: ' + name);
                             return;
                         }
                         try {
@@ -182,14 +183,13 @@
                         }
                     };
 
-                    xhr.open('GET', vpath, true);
+                    xhr.open('GET', name + '.vue', true);
                     xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
                     xhr.send();
-                }
+                };
             };
-
         }
-    }
+    };
 
     Vue.use(DotVue);
 

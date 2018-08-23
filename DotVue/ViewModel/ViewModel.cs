@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Reflection;
-using System.Text;
-using System.Web;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace DotVue
 {
@@ -17,9 +12,9 @@ namespace DotVue
         protected JavascriptBuilder ClientScript { get; private set; } = new JavascriptBuilder();
 
         /// <summary>
-        /// Get request data from client. Do not update direct from here - use properties
+        /// Get requested viewmodel data from client (before any change)
         /// </summary>
-        protected JObject Data { get; private set; } = null;
+        protected JObject Data { get; private set; } = new JObject();
 
         /// <summary>
         /// In page call during initialize. In component, made ajax call when component are created
@@ -47,6 +42,11 @@ namespace DotVue
             vm.OnCreated();
         }
 
+        internal static void SetData(ViewModel vm, JObject data)
+        {
+            vm.Data = data;
+        }
+
         internal static string GetClientScript(ViewModel vm)
         {
             return vm.ClientScript.ToString();
@@ -55,11 +55,6 @@ namespace DotVue
         internal static void Execute(ViewModel vm, MethodInfo method, object[] parameters)
         {
             vm.OnExecute(method, parameters);
-        }
-
-        internal static void SetData(ViewModel vm, JObject data)
-        {
-            vm.Data = data;
         }
 
         #endregion

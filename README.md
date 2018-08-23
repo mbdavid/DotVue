@@ -1,12 +1,13 @@
 # DotVue
 
-Implement `.vue` single-file component with server-side ViewModel using `.ascx` file.
+Implement `.vue` single-file component with server-side ViewModel. Support ASP.NET Core 2 (implemented using NetStandard 2)
 
+> Login.vue.cs
 
-```HTML
-<script runat="server">
+```C#
+namespace ServerViewModel
 
-    public class LoginVM : ViewModel
+    public class Login : ViewModel
     {
         public Username { get; set; }
         public Password { get; set; }
@@ -17,8 +18,13 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
             Message = AuthServie.Login(Username, Password);
         }
     }
-    
-</script>
+}
+```
+
+> Login.vue
+
+```HTML
+@viewmodel ServerViewModel.Login
 
 <template>
 
@@ -40,13 +46,10 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
     
 </template>
 
-<style lang="less">
+<style>
 
-    /* Support less tags */
-    @import "base.less";
-    
     .login-box {
-        border: 1px solid @line-color;
+        border: 1px solid silver;
         button { display: block; }
     }
     
@@ -70,43 +73,27 @@ Implement `.vue` single-file component with server-side ViewModel using `.ascx` 
 
 ## Setup
 
-- Add `.vue` handler
-```XML
-    <handlers>
-      <add name="vue" path="*.vue" type="DotVue.Handler, DotVue" verb="*"/>
-    </handlers>
-```
-- Add in your page script for `bootstrap.vue` and with discover all components: sync (inline) or async (via ajax loader)
-```HTML
-    <script src="bootstrap.vue?discover=async"></script>
-```
+```C#
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
 
-- Write you own .ascx component as Vue single component
+    app.UseDotVue(c =>
+    {
+        c.AddAssembly(typeof(Startup).Assembly);
+    });
+}
+```
 
 # Features
 
+- ASP.NET Core 2
 - Server based ViewModel with attributes decorations: methods, watchs and props
+- Deploy view as embedded resource (all app into single dll)
 - Support file upload
-- Resolve computed server-side expression to javascript function (using simple LINQ visitor)
-- Support multiple loaders: `.ascx`, `.vue` or static file to render as single javascript Vue component
-- Bootstrap and discover all components
-- Support custom tag compiler (like LESS or TypeScript)
-- Ready for any Vue plugin
+- Support any external vue plugin
 
-# TODO
-
-- Change Plugin to Extend/Extension?
-- Add back static + .vue loader
-- Async/Sync per Loader instance? (controls could be sync, pages async)
-    
-- Support for mobile/tablet/desktop templates/scripts/styles
-    - <template target="mobile"> target="desktop+mobile"
-
-- Support "import/require" in <script> 
-    <script src="http://cdn.net/jquery.js" var="$" /> 
-    
-- Cache in Handler (not in loader) when context.IsDebuggingEnabled in context.Cache
-- Remove CompoenentInfo.Name => All componenet are based in vpath only
-- Discover will returns vpaths only - name will be created by filename only
+- See `WebApp` for examples
 
 

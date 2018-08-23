@@ -1,7 +1,6 @@
-﻿using System.Security.Cryptography;
+﻿using Newtonsoft.Json;
 using System.Text;
 using System.Web;
-using Newtonsoft.Json;
 
 namespace DotVue
 {

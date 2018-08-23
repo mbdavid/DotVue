@@ -10,7 +10,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace DotVue
 {
-    internal class CustomContractResolver : CamelCasePropertyNamesContractResolver
+    internal class CustomContractResolver : DefaultContractResolver
     {
         public static readonly CustomContractResolver Instance = new CustomContractResolver();
 

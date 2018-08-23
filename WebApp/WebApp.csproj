@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Components\SimpleLayout.vue.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Components\Page1.vue" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Components\Page1.vue" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Components\SimpleLayout.vue.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotVue\DotVue.csproj" />
+  </ItemGroup>
+
+</Project>

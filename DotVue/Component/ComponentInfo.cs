@@ -1,34 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.UI;
 using Newtonsoft.Json.Linq;
 
 namespace DotVue
 {
-    public class ComponentInfo
+    internal class ComponentInfo
     {
-        public string VPath { get; private set; }
-        public string Name { get; private set; }
-        public Type ViewModel { get; private set; }
-        public string Content { get; private set; }
+        public string Name { get; set; }
 
-        public ComponentInfo(string name, string vpath)
-        {
-            this.Name = name;
-            this.VPath = vpath;
-        }
+        public Type ViewModelType { get; set; } = typeof(ViewModel);
 
-        public ComponentInfo(string name, string vpath, Type viewModel, string content)
+        public bool IsAutenticated { get; set; } = false;
+        public string[] Roles { get; set; } = new string[0];
+
+        public string Template { get; set; } = "";
+        public List<string> Styles { get; set; } = new List<string>();
+        public List<string> Scripts { get; set; } = new List<string>();
+
+        public JObject Data { get; set; } = new JObject();
+        public List<string> Props { get; set; } = new List<string>();
+        public Dictionary<string, ViewModelMethod> Methods { get; set; } = new Dictionary<string, ViewModelMethod>();
+        public Dictionary<string, string> Watch { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Computed { get; set; } = new Dictionary<string, string>();
+        public List<string> Locals { get; set; } = new List<string>();
+
+        public bool CreatedHook => this.Methods.ContainsKey("OnCreated");
+
+        public static ComponentInfo Message(string name, string message)
         {
-            this.Name = name;
-            this.VPath = vpath;
-            this.ViewModel = viewModel;
-            this.Content = content;
+            return new ComponentInfo
+            {
+                Name = name,
+                Template = $"<div class='dot-vue-error'>{message}</div>"
+            };
         }
     }
 }
