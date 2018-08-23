@@ -1,21 +1,22 @@
 # DotVue
 
-Implement `.vue` single-file component with server-side ViewModel. Support ASP.NET Core 2 (implemented using NetStandard 2)
+Implement `.vue` single-file component with server-side ViewModel. Use all power of VueJS with simple C# server side data access.
 
 > Login.vue.cs
 
 ```C#
 namespace ServerViewModel
-
+{
     public class Login : ViewModel
     {
         public Username { get; set; }
         public Password { get; set; }
+        
         public Message { get; set; }
 
         public void Login()
         {
-            Message = AuthServie.Login(Username, Password);
+            this.Message = AuthServie.Login(Username, Password);
         }
     }
 }
@@ -51,6 +52,10 @@ namespace ServerViewModel
     .login-box {
         border: 1px solid silver;
         button { display: block; }
+    }
+    
+    .alert {
+        color: red;
     }
     
 </style>
@@ -90,7 +95,7 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 
 - ASP.NET Core 2
 - Server based ViewModel with attributes decorations: methods, watchs and props
-- Deploy view as embedded resource (all app into single dll)
+- Deploy `.vue` file as embedded resource (deploy only `.dll` file)
 - Support file upload
 - Support any external vue plugin
 
