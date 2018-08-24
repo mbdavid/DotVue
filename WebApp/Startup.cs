@@ -26,6 +26,8 @@ namespace WebApp
 
             app.UseDotVue(c =>
             {
+                c.Extension = ".vue";
+
                 c.AddAssembly(typeof(Startup).Assembly);
             });
 

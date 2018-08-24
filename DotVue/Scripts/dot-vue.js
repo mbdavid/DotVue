@@ -175,8 +175,13 @@
                         }
                         try {
                             var fn = new Function(xhr.responseText);
-                            var options = fn();
-                            resolve(options);
+
+                            var obj = fn();
+
+                            // run includes (js/css)
+                            loadjs(obj.includes, function () {
+                                resolve(obj.options);
+                            });
                         }
                         catch (e) {
                             alert(e);
@@ -192,6 +197,11 @@
     };
 
     Vue.use(DotVue);
+
+    // load all items async and exec fn()
+    function loadjs(items, fn) {
+        fn();
+    }
 
     // execute console log without showing file: http://stackoverflow.com/questions/34762774/how-to-hide-source-of-log-messages-in-console
     function log() {

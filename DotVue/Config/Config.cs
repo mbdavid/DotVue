@@ -6,12 +6,26 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Principal;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
 
 namespace DotVue
 {
     public class Config
     {
         private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>();
+
+        private readonly IServiceProvider _service;
+        private readonly bool _isDev;
+
+        public Config(IServiceProvider service)
+        {
+            _service = service;
+
+            var env = _service.GetService<IHostingEnvironment>();
+
+            _isDev = env.IsDevelopment();
+        }
 
         /// <summary>
         /// Get/Set extension used in Vue components. Default: ".vue"
@@ -68,7 +82,6 @@ namespace DotVue
                 if (c.IsAutenticated && user.Identity.IsAuthenticated == false) return ComponentInfo.Message(name, $"Component '{name}' requires authentication");;
                 if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) ComponentInfo.Message(name, $"Component '{name}' requires roles '{string.Join(", ", c.Roles)}'");
 
-
                 return c;
             }
             else
@@ -78,7 +91,7 @@ namespace DotVue
         }
 
         /// <summary>
-        /// Load all from webroot path (debug mode)
+        /// Load all from webroot path (for debug mode)
         /// </summary>
         private void LoadWebFilesComponents(string root)
         {

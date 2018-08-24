@@ -17,7 +17,7 @@ namespace DotVue
     {
         public static IApplicationBuilder UseDotVue(this IApplicationBuilder builder, Action<Config> setup)
         {
-            var config = new Config();
+            var config = new Config(builder.ApplicationServices);
 
             setup(config);
 

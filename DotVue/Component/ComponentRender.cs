@@ -34,6 +34,8 @@ namespace DotVue
             }
 
             writer.Append("return {\n");
+            writer.Append(" includes: [],\n");
+            writer.Append(" options: {\n");
 
             if (_component.Props.Count > 0)
             {
@@ -123,7 +125,9 @@ namespace DotVue
 
             // add vpath to options
             writer.AppendFormat("  name: '{0}'\n", _component.Name);
-            writer.Append("}");
+            writer.Append(" }\n");
+
+            writer.Append("};");
         }
     }
 }
