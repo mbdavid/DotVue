@@ -198,9 +198,61 @@
 
     Vue.use(DotVue);
 
-    // load all items async and exec fn()
-    function loadjs(items, fn) {
-        fn();
+    var _loaded = {};
+
+    // very simple queue script/css loader, based on loadjs (https://github.com/muicss/loadjs/blob/master/dist/loadjs.js)
+    function loadjs(items, fn, index, numTries) {
+
+        index = index || 0;
+
+        // finish queue
+        if (items.length === index) return fn();
+
+        var path = items[index];
+
+        // if already loaded
+        if (_loaded[path]) return loadjs(items, fn, index + 1);
+
+        var isCss = /(^css!|\.css$)/.test(path);
+        var pathStripped = path.replace(/^(css|js)!/, '');
+        var e = null;
+
+        if (isCss) {
+            e = document.createElement('link');
+            e.rel = 'stylesheet';
+            e.href = pathStripped;
+        }
+        else {
+            e = document.createElement('script');
+            e.src = path;
+            e.async = true;
+        }
+
+        e.onload = e.onerror = e.onbeforeload = function (ev) {
+
+            var result = ev.type[0];
+
+            // note: The following code isolates IE using `hideFocus` and treats empty stylesheets as failures to get around lack of onerror support
+            if (isCss && 'hideFocus' in e) {
+                try {
+                    if (!e.sheet.cssText.length) result = 'e';
+                } catch (x) {
+                    // sheets objects created from load errors don't allow access to `cssText`
+                    result = 'e';
+                }
+            }
+
+            // handle retries in case of load failure
+            if (result == 'e' && ((numTries || 0) + 1) < 3) {
+                return loadjs(items, fn, index, numTries + 1);
+            }
+
+            // execute next
+            return loadjs(items, fn, index + 1);
+        };
+
+        // add into html document
+        document.head.appendChild(e);
     }
 
     // execute console log without showing file: http://stackoverflow.com/questions/34762774/how-to-hide-source-of-log-messages-in-console
