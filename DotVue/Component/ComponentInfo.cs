@@ -16,6 +16,7 @@ namespace DotVue
         public string Template { get; set; } = "";
         public List<string> Styles { get; set; } = new List<string>();
         public List<string> Scripts { get; set; } = new List<string>();
+        public List<string> Includes { get; set; } = new List<string>();
 
         public JObject Data { get; set; } = new JObject();
         public List<string> Props { get; set; } = new List<string>();

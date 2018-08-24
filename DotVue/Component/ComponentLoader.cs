@@ -37,6 +37,7 @@ namespace DotVue
                 Template = html.Template,
                 Styles = html.Styles,
                 Scripts = html.ClientScripts,
+                Includes = html.Includes,
                 ViewModelType = type,
                 Data = this.GetData(type),
                 Props = this.GetProps(type).ToList(),

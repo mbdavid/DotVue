@@ -42,20 +42,14 @@ namespace DotVue
         public List<string> Styles { get; private set; } = new List<string>();
 
         /// <summary>
-        /// Tags [link rel="stylesheet" href="...." /]
-        /// </summary>
-        public List<string> IncludeStyles { get; private set; } = new List<string>();
-
-        /// <summary>
         /// Tags [script]...[/script]
         /// </summary>
         public List<string> ClientScripts { get; private set; } = new List<string>();
 
         /// <summary>
-        /// Tags [script src="...."][/script] (string = src)
+        /// Tags [script src="...."][/script] (string = src) or [link href="..." ref="stylesheet"]
         /// </summary>
-        public List<string> IncludeScripts { get; private set; } = new List<string>();
-
+        public List<string> Includes { get; private set; } = new List<string>();
 
         public HtmlFile(string content)
         {
@@ -101,13 +95,13 @@ namespace DotVue
                     case "link":
                         if (tag.Attributes.TryGetValue("href", out var href))
                         {
-                            this.IncludeStyles.Add(href);
+                            this.Includes.Add(href);
                         }
                         break;
                     case "script":
                         if(tag.Attributes.TryGetValue("src", out var src))
                         {
-                            this.IncludeScripts.Add(src);
+                            this.Includes.Add(src);
                         }
                         else
                         {

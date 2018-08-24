@@ -34,7 +34,7 @@ namespace DotVue
             }
 
             writer.Append("return {\n");
-            writer.Append(" includes: [],\n");
+            writer.AppendFormat(" includes: [{0}],\n", string.Join(",", _component.Includes.Select(x => $"'{x}'")));
             writer.Append(" options: {\n");
 
             if (_component.Props.Count > 0)
