@@ -37,7 +37,7 @@ namespace DotVue
         /// </summary>
         public void AddAssembly(Assembly assembly)
         {
-            var loader = new ComponentLoader();
+            var loader = new ComponentLoader(_service);
 
             foreach (var path in assembly
                 .GetManifestResourceNames()
@@ -91,12 +91,20 @@ namespace DotVue
         }
 
         /// <summary>
+        /// Create new ViewModel instance using dependency injection
+        /// </summary>
+        internal ViewModel CreateInstance(Type viewModelType)
+        {
+            return (ViewModel)ActivatorUtilities.CreateInstance(_service, viewModelType);
+        }
+
+        /// <summary>
         /// Load all from webroot path (for debug mode)
         /// </summary>
         private void LoadWebFilesComponents(string root)
         {
             var webAssembly = Assembly.GetEntryAssembly();
-            var loader = new ComponentLoader();
+            var loader = new ComponentLoader(_service);
 
             foreach (var path in Directory.GetFiles(root, "*" + Extension, SearchOption.AllDirectories))
             {

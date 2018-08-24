@@ -31,21 +31,21 @@ namespace DotVue
 
         #region Update Models
 
-        public async Task UpdateModel(string data, string props, string method, JToken[] parameters, IFormFileCollection files, TextWriter writer)
+        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, TextWriter writer)
         {
-            // get request json object
-            var request = JObject.Parse(data);
+            // populate my object with client $data
+            JsonConvert.PopulateObject(data, vm, JsonSettings.JsonSerializerSettings);
 
-            // and merge with props
-            request.Merge(JObject.Parse(props), JsonSettings.JsonMergeSettings);
+            // populate my object with client $props
+            JsonConvert.PopulateObject(props, vm, JsonSettings.JsonSerializerSettings);
 
-            // create new instance of ViewModel based on request data/props
-            var vm = (ViewModel)request.ToObject(_component.ViewModelType);
+            // parse $data as original value (before any update)
+            var original = JObject.Parse(data);
 
             try
             {
                 // set viewmodel request data
-                ViewModel.SetData(vm, request);
+                ViewModel.SetData(vm, original);
 
                 // if has method, call in existing vms
                 this.ExecuteMethod(method, vm, parameters, files);
@@ -57,7 +57,7 @@ namespace DotVue
                 var scripts = ViewModel.GetClientScript(vm);
 
                 // detect changed from original to current data and send back to browser
-                var diff = this.GetDiff(request, current);
+                var diff = this.GetDiff(original, current);
 
                 // write changes to writer
                 using (var w = new JsonTextWriter(writer))

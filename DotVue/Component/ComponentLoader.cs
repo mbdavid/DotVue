@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +12,13 @@ namespace DotVue
     /// </summary>
     internal class ComponentLoader
     {
+        private readonly IServiceProvider _service;
+
+        public ComponentLoader(IServiceProvider service)
+        {
+            _service = service;
+        }
+
         public ComponentInfo Load(string fullname, Stream stream, Assembly assembly)
         {
             HtmlFile html;
@@ -73,7 +81,7 @@ namespace DotVue
         /// </summary>
         public JObject GetData(Type type)
         {
-            using (var vm = (ViewModel)Activator.CreateInstance(type))
+            using (var vm = (ViewModel)ActivatorUtilities.CreateInstance(_service, type))
             {
                 return JObject.FromObject(vm, JsonSettings.JsonSerializer);
             }

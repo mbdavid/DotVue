@@ -95,7 +95,9 @@ namespace DotVue
 
                 try
                 {
-                    await update.UpdateModel(data, props, method, parameters, request.Form.Files, writer);
+                    var vm = _config.CreateInstance(component.ViewModelType);
+
+                    await update.UpdateModel(vm, data, props, method, parameters, request.Form.Files, writer);
                 }
                 catch(Exception ex)
                 {
