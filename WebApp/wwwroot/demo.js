@@ -1,3 +1,4 @@
-﻿function MyFunc() {
+﻿// my func
+function MyFunc(id, ok) {
 
 }

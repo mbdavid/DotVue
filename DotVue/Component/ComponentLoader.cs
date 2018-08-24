@@ -19,7 +19,7 @@ namespace DotVue
             _service = service;
         }
 
-        public ComponentInfo Load(string fullname, Stream stream, Assembly assembly)
+        public ComponentInfo Load(string name, Stream stream, Assembly assembly)
         {
             HtmlFile html;
 
@@ -33,7 +33,7 @@ namespace DotVue
 
             var component = new ComponentInfo
             {
-                Name = html.Name ?? GetName(fullname),
+                Name = html.Name ?? name,
                 Template = html.Template,
                 Styles = html.Styles,
                 Scripts = html.ClientScripts,
@@ -53,7 +53,7 @@ namespace DotVue
         /// <summary>
         /// Get component name based on resource name
         /// </summary>
-        private string GetName(string fullname)
+        public static string GetName(string fullname)
         {
             var arr = fullname.Split('.');
 
@@ -163,18 +163,21 @@ namespace DotVue
         private ViewModelMethod GetViewModelMethod(MethodInfo m)
         {
             var scripts = m.GetCustomAttributes<ScriptAttribute>(true).ToArray();
-            var roles = m.GetCustomAttribute<AutorizeAttribute>(true);
+            var autorize = m.GetCustomAttribute<AutorizeAttribute>(true);
 
             var pre = scripts.Where(x => !string.IsNullOrWhiteSpace(x.Pre)).Select(x => x.Pre).ToArray();
             var post = scripts.Where(x => !string.IsNullOrWhiteSpace(x.Post)).Select(x => x.Post).ToArray();
             var parameters = m.GetParameters().Select(x => x.Name).ToArray();
+            var roles = autorize?.Roles ?? new string[0];
 
             return new ViewModelMethod
             {
                 Method = m,
                 Pre = pre,
                 Post = post,
-                Parameters = parameters
+                Parameters = parameters,
+                IsAuthenticated = autorize != null,
+                Roles = roles
             };
         }
     }

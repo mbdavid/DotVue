@@ -208,7 +208,7 @@
         // finish queue
         if (items.length === index) return fn();
 
-        var path = items[index];
+        var path = resolveUrl(items[index]);
 
         // if already loaded
         if (_loaded[path]) return loadjs(items, fn, index + 1);
@@ -253,6 +253,13 @@
 
         // add into html document
         document.head.appendChild(e);
+    }
+
+    // get full path from url
+    function resolveUrl(url) {
+        var a = document.createElement('a');
+        a.href = url;
+        return a.href;
     }
 
     // execute console log without showing file: http://stackoverflow.com/questions/34762774/how-to-hide-source-of-log-messages-in-console

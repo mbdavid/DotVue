@@ -27,12 +27,16 @@ namespace DotVue
 
         public bool CreatedHook => this.Methods.ContainsKey("OnCreated");
 
-        public static ComponentInfo Message(string name, string message)
+        public static ComponentInfo Error(string name, Exception ex)
         {
             return new ComponentInfo
             {
                 Name = name,
-                Template = $"<div class='dot-vue-error'>{message}</div>"
+                Template = 
+                    $"<div style=\"background-color:#ffc;padding:15px;font-family:Arial;font-size:12px;\">" + 
+                    $"<div style='color: #800000; font-size: 22px; font-style: italic;'>[{name}] {ex.Message}</div>" + 
+                    $"<pre>{ex.StackTrace}</pre>" +
+                    "</div>"
             };
         }
     }

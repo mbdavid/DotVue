@@ -13,5 +13,8 @@ namespace DotVue
         public string[] Post { get; set; }
         public string[] Parameters { get; set; }
         public MethodInfo Method { get; set; }
+
+        public bool IsAuthenticated { get; set; } = false;
+        public string[] Roles { get; set; } = new string[0];
     }
 }

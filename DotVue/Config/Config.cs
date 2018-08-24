@@ -45,9 +45,19 @@ namespace DotVue
             {
                 using (var stream = assembly.GetManifestResourceStream(path))
                 {
-                    var component = loader.Load(path, stream, assembly);
+                    var name = ComponentLoader.GetName(path);
 
-                    _components[component.Name] = component;
+                    try
+                    {
+                        var component = loader.Load(name, stream, assembly);
+
+                        _components[component.Name] = component;
+                    }
+                    catch (Exception ex)
+                    {
+                        _components[name] = ComponentInfo.Error(name, ex);
+                    }
+
                 }
             }
         }
@@ -79,14 +89,14 @@ namespace DotVue
         {
             if (_components.TryGetValue(name, out var c))
             {
-                if (c.IsAutenticated && user.Identity.IsAuthenticated == false) return ComponentInfo.Message(name, $"Component '{name}' requires authentication");;
-                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) ComponentInfo.Message(name, $"Component '{name}' requires roles '{string.Join(", ", c.Roles)}'");
+                if (c.IsAutenticated && user.Identity.IsAuthenticated == false) return ComponentInfo.Error(name, new HttpException(401));
+                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) ComponentInfo.Error(name, new HttpException(403));
 
                 return c;
             }
             else
             {
-                return ComponentInfo.Message(name, $"Component '{name}' not found");
+                return ComponentInfo.Error(name, new Exception($"Component {name} not exists"));
             }
         }
 
@@ -110,7 +120,7 @@ namespace DotVue
             {
                 using (var stream = File.OpenRead(path))
                 {
-                    var name = path.Replace(@"\", ".");
+                    var name = ComponentLoader.GetName(path.Replace(@"\", "."));
 
                     try
                     {
@@ -120,7 +130,7 @@ namespace DotVue
                     }
                     catch(Exception ex)
                     {
-                        _components[name] = ComponentInfo.Message(name, $"Error on load '{name}': {ex.Message}<pre>{ex.StackTrace}</pre>");
+                        _components[name] = ComponentInfo.Error(name, ex);
                     }
                 }
             }

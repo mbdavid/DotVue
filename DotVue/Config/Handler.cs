@@ -93,27 +93,9 @@ namespace DotVue
 
                 var writer = new StreamWriter(response.Body);
 
-                try
-                {
-                    var vm = _config.CreateInstance(component.ViewModelType);
+                var vm = _config.CreateInstance(component.ViewModelType);
 
-                    await update.UpdateModel(vm, data, props, method, parameters, request.Form.Files, writer);
-                }
-                catch(Exception ex)
-                {
-                    var err = ex is TargetInvocationException ? ex.InnerException : ex;
-
-                    response.Clear();
-                    response.ContentType = "text/html";
-                    response.StatusCode = 500;
-                    await response.WriteAsync(
-                        $"<div style='background-color: white; border: 1px solid gray; padding: 20px; font-family: Arial; font-size: 11px; color: black;'>" +
-                        $"<div style='color: #800000; font-size: 22px; font-style: italic;'>{err.Message}</div>" +
-                        $"<div style='margin-top: 20px;'><strong>Component:</strong> {name} - <strong>Method:</strong> {method}(<code style='font-family: Consolas; background-color: #eff0f1; padding: 1px 5px;'>{request.Form["params"]}</code>)</div>" +
-                        $"<div style='margin-top: 20px;'><strong>Data:</strong> <code style='font-family: Consolas; background-color: #eff0f1; padding: 1px 5px;'>{data}</code></div>" +
-                        $"<pre style='margin-top: 20px; background-color: #ffc; padding: 20px;'>{err.StackTrace}</pre>" +
-                        $"</div>");
-                }
+                await update.UpdateModel(vm, data, props, method, parameters, request.Form.Files, writer);
             }
         }
     }
