@@ -12,27 +12,22 @@ namespace WebApp.Components
 
         public Local()
         {
-            this.Items = new List<string> { "Constructor", "Values" };
         }
 
         protected override void OnCreated()
         {
-            this.Items = new List<string> { "OnCreated", "Values" };
-        }
-
-        public void LoadData()
-        {
-            this.Items = new List<string> { "New", "Load", "Data" };
+            // local properties are only from Server-to-Client
+            this.Items = new List<string> { "Initial", "Values", "From", "Ctor", "ViewModel", DateTime.Now.ToString() };
         }
 
         public void ChangeData()
         {
-            this.Items = new List<string> { "Changed", "Data" };
+            this.Items = new List<string> { "Changed" };
         }
 
         public void CheckData()
         {
-            this.ClientScript.Alert("Current Items in Server: " + string.Join(", ", Items));
+            this.ClientScript.Alert("Items in server must be null (because are initialized only on OnCreated()): " + (Items == null));
         }
     }
 }

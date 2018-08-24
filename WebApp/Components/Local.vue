@@ -2,7 +2,8 @@
 
 <template>
     <div>
-        <button @click="LoadData()">LoadData()</button>
+        [Local] properties only send data from server to client. Useful for grid models
+        <hr/>
         <button @click="ChangeData()">ChangeData()</button>
         <button @click="CheckData()">CheckData()</button>
         <hr />
