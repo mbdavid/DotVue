@@ -40,7 +40,7 @@ namespace DotVue
             JsonConvert.PopulateObject(props, vm, JsonSettings.JsonSerializerSettings);
 
             // parse $data as original value (before any update)
-            var original = JObject.Parse(data);
+            var original = JObject.FromObject(vm);
 
             try
             {
