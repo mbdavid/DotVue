@@ -9,12 +9,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Components\Encoding.vue" />
     <None Remove="Components\Includes.vue" />
     <None Remove="Components\Page1.vue" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Components\Includes.vue" />
+    <EmbeddedResource Include="Components\Encoding.vue" />
     <EmbeddedResource Include="Components\Page1.vue" />
   </ItemGroup>
 
