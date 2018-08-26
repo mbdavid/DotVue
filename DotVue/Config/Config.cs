@@ -13,18 +13,12 @@ namespace DotVue
 {
     public class Config
     {
+        private readonly Dictionary<string, ComponentDiscover> _discovers = new Dictionary<string, ComponentDiscover>();
+
         private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>();
 
-        private readonly IServiceProvider _service;
-        private readonly bool _isDev;
-
-        public Config(IServiceProvider service)
+        public Config()
         {
-            _service = service;
-
-            var env = _service.GetService<IHostingEnvironment>();
-
-            _isDev = env.IsDevelopment();
         }
 
         /// <summary>
@@ -37,46 +31,58 @@ namespace DotVue
         /// </summary>
         public void AddAssembly(Assembly assembly)
         {
-            var loader = new ComponentLoader(_service);
-
-            foreach (var path in assembly
+            foreach (var resourceName in assembly
                 .GetManifestResourceNames()
                 .Where(x => Path.GetExtension(x) == Extension))
             {
-                using (var stream = assembly.GetManifestResourceStream(path))
+                var file = new HtmlFile(assembly.GetManifestResourceStream(resourceName));
+                var name = file.Name ?? ComponentLoader.GetName(resourceName);
+
+                _discovers[name] = new ComponentDiscover
                 {
-                    var name = ComponentLoader.GetName(path);
+                    Name = name,
+                    Assembly = assembly,
+                    File = file
+                };
+            }
+        }
 
-                    try
-                    {
-                        var component = loader.Load(name, stream, assembly);
+        /// <summary>
+        /// Add new assembly into vue handler components
+        /// </summary>
+        private void AddWebFiles(string root, Assembly assembly)
+        {
+            foreach (var path in Directory.GetFiles(root, "*" + Extension, SearchOption.AllDirectories))
+            {
+                var file = new HtmlFile(File.OpenRead(path));
+                var name = file.Name ?? ComponentLoader.GetName(path.Replace(@"\", "."));
 
-                        _components[component.Name] = component;
-                    }
-                    catch (Exception ex)
-                    {
-                        _components[name] = ComponentInfo.Error(name, ex);
-                    }
-
-                }
+                _discovers[name] = new ComponentDiscover
+                {
+                    Name = name,
+                    Assembly = assembly,
+                    File = file
+                };
             }
         }
 
         /// <summary>
         /// Return all component that user has access
         /// </summary>
-        internal IEnumerable<string> Discover(IPrincipal user, string root)
+        internal IEnumerable<string> Discover(IPrincipal user, IServiceProvider service)
         {
+            var env = service.GetService<IHostingEnvironment>();
+
             // in development, read physical root directory and find pages (not only embedded resources)
-            if (root != null)
+            if (env.IsDevelopment())
             {
-                this.LoadWebFilesComponents(root);
+                this.AddWebFiles(env.ContentRootPath, Assembly.GetEntryAssembly());
             }
 
-            foreach (var c in _components.Values)
+            foreach (var c in _discovers.Values)
             {
-                if (c.IsAutenticated && user.Identity.IsAuthenticated == false) continue;
-                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) continue;
+                if (c.File.Auth && user.Identity.IsAuthenticated == false) continue;
+                if (c.File.Roles.Count > 0 && c.File.Roles.Any(x => user.IsInRole(x)) == false) continue;
 
                 yield return c.Name;
             }
@@ -85,7 +91,7 @@ namespace DotVue
         /// <summary>
         /// Load specific component by name
         /// </summary>
-        internal ComponentInfo Load(IPrincipal user, string name)
+        internal ComponentInfo Load(IPrincipal user, IServiceProvider service, string name)
         {
             if (_components.TryGetValue(name, out var c))
             {
@@ -94,45 +100,19 @@ namespace DotVue
 
                 return c;
             }
+            else if(_discovers.TryGetValue(name, out var d))
+            {
+                var loader = new ComponentLoader(service);
+
+                c = loader.Load(d);
+
+                _components[c.Name] = c;
+
+                return c;
+            }
             else
             {
                 return ComponentInfo.Error(name, new Exception($"Component {name} not exists"));
-            }
-        }
-
-        /// <summary>
-        /// Create new ViewModel instance using dependency injection
-        /// </summary>
-        internal ViewModel CreateInstance(Type viewModelType)
-        {
-            return (ViewModel)ActivatorUtilities.CreateInstance(_service, viewModelType);
-        }
-
-        /// <summary>
-        /// Load all from webroot path (for debug mode)
-        /// </summary>
-        private void LoadWebFilesComponents(string root)
-        {
-            var webAssembly = Assembly.GetEntryAssembly();
-            var loader = new ComponentLoader(_service);
-
-            foreach (var path in Directory.GetFiles(root, "*" + Extension, SearchOption.AllDirectories))
-            {
-                using (var stream = File.OpenRead(path))
-                {
-                    var name = ComponentLoader.GetName(path.Replace(@"\", "."));
-
-                    try
-                    {
-                        var component = loader.Load(name, stream, webAssembly);
-
-                        _components[component.Name] = component;
-                    }
-                    catch(Exception ex)
-                    {
-                        _components[name] = ComponentInfo.Error(name, ex);
-                    }
-                }
             }
         }
     }

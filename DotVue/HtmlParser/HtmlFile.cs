@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -51,8 +52,16 @@ namespace DotVue
         /// </summary>
         public List<string> Includes { get; private set; } = new List<string>();
 
-        public HtmlFile(string content)
+        public HtmlFile(Stream stream)
         {
+            var content = "";
+
+            using (stream)
+            using (var reader = new StreamReader(stream))
+            {
+                content = reader.ReadToEnd();
+            }
+
             var s = new StringScanner(content, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
             while (!s.HasTerminated)

@@ -19,25 +19,19 @@ namespace DotVue
             _service = service;
         }
 
-        public ComponentInfo Load(string name, Stream stream, Assembly assembly)
+        public ComponentInfo Load(ComponentDiscover discover)
         {
-            HtmlFile html;
-
-            using (var r = new StreamReader(stream))
-            {
-                var content = r.ReadToEnd();
-                html = new HtmlFile(content);
-            }
-
-            var type = this.GetViewModelType(html, assembly);
+            var type = discover.File.ViewModel == null ?
+                typeof(ViewModel) :
+                discover.Assembly.GetType(discover.File.ViewModel, true);
 
             var component = new ComponentInfo
             {
-                Name = html.Name ?? name,
-                Template = html.Template,
-                Styles = html.Styles,
-                Scripts = html.ClientScripts,
-                Includes = html.Includes,
+                Name = discover.Name,
+                Template = discover.File.Template,
+                Styles = discover.File.Styles,
+                Scripts = discover.File.ClientScripts,
+                Includes = discover.File.Includes,
                 ViewModelType = type,
                 Data = this.GetData(type),
                 Props = this.GetProps(type).ToList(),
@@ -61,26 +55,9 @@ namespace DotVue
         }
 
         /// <summary>
-        /// Get viewModel type from directive or inline code (or empty view model)
-        /// </summary>
-        private Type GetViewModelType(HtmlFile html, Assembly assembly)
-        {
-            if (html.ViewModel != null)
-            {
-                // get viewmode based on @viewmodel directive
-                return assembly.GetType(html.ViewModel, true);
-            }
-            else
-            {
-                // otherwise return empty viewmodel
-                return typeof(ViewModel);
-            }
-        }
-
-        /// <summary>
         /// Get default ViewModel data object
         /// </summary>
-        public JObject GetData(Type type)
+        private JObject GetData(Type type)
         {
             using (var vm = (ViewModel)ActivatorUtilities.CreateInstance(_service, type))
             {
@@ -91,7 +68,7 @@ namespace DotVue
         /// <summary>
         /// Get all properties defined as [Prop] attribute
         /// </summary>
-        public IEnumerable<string> GetProps(Type type)
+        private IEnumerable<string> GetProps(Type type)
         {
             return type
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -102,7 +79,7 @@ namespace DotVue
         /// <summary>
         /// Get all properties defined as [Local] attribute
         /// </summary>
-        public IEnumerable<string> GetLocals(Type type)
+        private IEnumerable<string> GetLocals(Type type)
         {
             return type
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -113,7 +90,7 @@ namespace DotVue
         /// <summary>
         /// Get all properties defined as [Computed] attribute (ComputedName, JsCode)
         /// </summary>
-        public IEnumerable<KeyValuePair<string, string>> GetComputed(Type type)
+        private IEnumerable<KeyValuePair<string, string>> GetComputed(Type type)
         {
             return type
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -124,7 +101,7 @@ namespace DotVue
         /// <summary>
         /// Get all properties defined as [Computed] attribute (PropertyWatched, MethodName)
         /// </summary>
-        public IEnumerable<KeyValuePair<string, string>> GetWatch(Type type)
+        private IEnumerable<KeyValuePair<string, string>> GetWatch(Type type)
         {
             return type
                 .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
@@ -135,7 +112,7 @@ namespace DotVue
         /// <summary>
         /// Get all methods
         /// </summary>
-        public IEnumerable<ViewModelMethod> GetMethods(Type type)
+        private IEnumerable<ViewModelMethod> GetMethods(Type type)
         {
             // only call Created method if created was override in component
             var created = type.GetMethod("OnCreated", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);

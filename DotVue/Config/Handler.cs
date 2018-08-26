@@ -11,18 +11,17 @@ using Microsoft.AspNetCore.Builder;
 using System.Net.Http;
 using Microsoft.AspNetCore.Hosting;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotVue
 {
     public class Handler
     {
-        private readonly IHostingEnvironment _env;
-        private readonly RequestDelegate _next;
         private readonly Config _config;
+        private readonly RequestDelegate _next;
 
-        public Handler(IHostingEnvironment env, RequestDelegate next, Config config)
+        public Handler(RequestDelegate next, Config config)
         {
-            _env = env;
             _next = next;
             _config = config;
         }
@@ -54,10 +53,8 @@ namespace DotVue
 
                 writer.Append("\n\n//\n// Registering Vue Components\n//\n");
 
-                // get root path only in development
-                var root = _env.IsDevelopment() ? _env.ContentRootPath : null;
-
-                foreach (var comp in _config.Discover(user, root))
+                // discover all components
+                foreach (var comp in _config.Discover(user, context.RequestServices))
                 {
                     writer.Append($"Vue.component('{comp}', Vue.$loadComponent('{comp}'));\n");
                 }
@@ -69,7 +66,7 @@ namespace DotVue
                 response.ContentType = "text/javascript";
 
                 // render component script
-                var component = _config.Load(user, name);
+                var component = _config.Load(user, context.RequestServices, name);
                 var render = new ComponentRender(component, user);
                 var sb = new StringBuilder();
 
@@ -87,13 +84,13 @@ namespace DotVue
                 var method = request.Form["method"];
                 var parameters = JArray.Parse(request.Form["params"]).ToArray();
 
-                var component = _config.Load(user, name);
+                var component = _config.Load(user, context.RequestServices, name);
 
                 var update = new ComponentUpdate(component, user);
 
                 var writer = new StreamWriter(response.Body);
 
-                var vm = _config.CreateInstance(component.ViewModelType);
+                var vm = (ViewModel)ActivatorUtilities.CreateInstance(context.RequestServices, component.ViewModelType);
 
                 await update.UpdateModel(vm, data, props, method, parameters, request.Form.Files, writer);
             }
