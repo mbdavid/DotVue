@@ -9,7 +9,7 @@ namespace DotVue
     /// <summary>
     /// A very simple root tag parser. Parse HTML content and returns a list of tags with attributes/content
     /// </summary>
-    internal class HtmlTag
+    public class HtmlTag
     {
         /// <summary>
         /// Get tag name

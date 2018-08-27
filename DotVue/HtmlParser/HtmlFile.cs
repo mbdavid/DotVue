@@ -35,17 +35,17 @@ namespace DotVue
         /// <summary>
         /// Tag [template]
         /// </summary>
-        public string Template { get; private set; }
+        public HtmlTag Template { get; private set; }
 
         /// <summary>
         /// Tags [style]
         /// </summary>
-        public List<string> Styles { get; private set; } = new List<string>();
+        public List<HtmlTag> Styles { get; private set; } = new List<HtmlTag>();
 
         /// <summary>
         /// Tags [script]...[/script]
         /// </summary>
-        public List<string> ClientScripts { get; private set; } = new List<string>();
+        public List<HtmlTag> ClientScripts { get; private set; } = new List<HtmlTag>();
 
         /// <summary>
         /// Tags [script src="...."][/script] (string = src) or [link href="..." ref="stylesheet"]
@@ -96,10 +96,10 @@ namespace DotVue
                 switch(tag.TagName)
                 {
                     case "template":
-                        this.Template = tag.InnerHtml.ToString().Trim();
+                        this.Template = tag;
                         break;
                     case "style":
-                        this.Styles.Add(tag.InnerHtml.ToString().Trim());
+                        this.Styles.Add(tag);
                         break;
                     case "link":
                         if (tag.Attributes.TryGetValue("href", out var href))
@@ -114,7 +114,7 @@ namespace DotVue
                         }
                         else
                         {
-                            this.ClientScripts.Add(tag.InnerHtml.ToString().Trim());
+                            this.ClientScripts.Add(tag);
                         }
                         break;
                 }

@@ -170,8 +170,8 @@
 
                     xhr.onload = function () {
                         if (xhr.status < 200 || xhr.status >= 400) {
-                            alert('Error on load component: ' + name);
-                            return;
+                            document.body.innerHTML = xhr.responseText;
+                            return reject();
                         }
                         try {
                             var fn = new Function(xhr.responseText);
@@ -243,7 +243,7 @@
             }
 
             // handle retries in case of load failure
-            if (result == 'e' && ((numTries || 0) + 1) < 3) {
+            if (result === 'e' && ((numTries || 0) + 1) < 3) {
                 return loadjs(items, fn, index, numTries + 1);
             }
 

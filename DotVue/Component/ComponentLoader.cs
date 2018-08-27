@@ -13,10 +13,12 @@ namespace DotVue
     internal class ComponentLoader
     {
         private readonly IServiceProvider _service;
+        private readonly Dictionary<string, Func<HtmlTag, string>> _compilers;
 
-        public ComponentLoader(IServiceProvider service)
+        public ComponentLoader(IServiceProvider service, Dictionary<string, Func<HtmlTag, string>> compilers)
         {
             _service = service;
+            _compilers = compilers;
         }
 
         public ComponentInfo Load(ComponentDiscover discover)
@@ -28,9 +30,9 @@ namespace DotVue
             var component = new ComponentInfo
             {
                 Name = discover.Name,
-                Template = discover.File.Template,
-                Styles = discover.File.Styles,
-                Scripts = discover.File.ClientScripts,
+                Template = this.Compile(discover.File.Template),
+                Styles = discover.File.Styles.Select(x => this.Compile(x)).ToList(),
+                Scripts = discover.File.ClientScripts.Select(x => this.Compile(x)).ToList(),
                 Includes = discover.File.Includes,
                 ViewModelType = type,
                 Data = this.GetData(type),
@@ -52,6 +54,21 @@ namespace DotVue
             var arr = fullname.Split('.');
 
             return arr[arr.Length - 2];
+        }
+
+        /// <summary>
+        /// Compile html/css/js based on lang="" attribute
+        /// </summary>
+        private string Compile(HtmlTag tag)
+        {
+            if (tag.Attributes.TryGetValue("lang", out var lang) && _compilers.TryGetValue(lang, out var func))
+            {
+                return func(tag);
+            }
+            else
+            {
+                return tag.InnerHtml.ToString();
+            }
         }
 
         /// <summary>

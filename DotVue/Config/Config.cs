@@ -8,13 +8,17 @@ using System.Reflection;
 using System.Security.Principal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using System.Text;
 
 namespace DotVue
 {
     public class Config
     {
+        private readonly Dictionary<string, Func<HtmlTag, string>> _compilers = new Dictionary<string, Func<HtmlTag, string>>();
+
         private readonly Dictionary<string, ComponentDiscover> _discovers = new Dictionary<string, ComponentDiscover>();
 
+        // should be concurrent dictionary
         private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>();
 
         public Config()
@@ -48,6 +52,14 @@ namespace DotVue
         }
 
         /// <summary>
+        /// Add string compiler to html/js/css used when tag contains lang="..."
+        /// </summary>
+        public void AddCompiler(string lang, Func<HtmlTag, string> func)
+        {
+            _compilers[lang] = func;
+        }
+
+        /// <summary>
         /// Add new assembly into vue handler components
         /// </summary>
         private void AddWebFiles(string root, Assembly assembly)
@@ -63,6 +75,9 @@ namespace DotVue
                     Assembly = assembly,
                     File = file
                 };
+
+                // remove component to be re-loaded on next Load method (only for debug)
+                _components.Remove(name);
             }
         }
 
@@ -102,11 +117,14 @@ namespace DotVue
             }
             else if(_discovers.TryGetValue(name, out var d))
             {
-                var loader = new ComponentLoader(service);
+                var loader = new ComponentLoader(service, _compilers);
 
                 c = loader.Load(d);
 
                 _components[c.Name] = c;
+
+                if (c.IsAutenticated && user.Identity.IsAuthenticated == false) return ComponentInfo.Error(name, new HttpException(401));
+                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) ComponentInfo.Error(name, new HttpException(403));
 
                 return c;
             }

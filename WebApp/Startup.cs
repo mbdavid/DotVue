@@ -40,8 +40,15 @@ namespace WebApp
                 c.Extension = ".vue";
 
                 c.AddAssembly(typeof(Startup).Assembly);
-            });
 
+                c.AddCompiler("less", tag =>
+                {
+                    var content = tag.InnerHtml.ToString();
+
+                    return dotless.Core.Less.Parse(content,
+                        new dotless.Core.configuration.DotlessConfiguration { MinifyOutput = true });
+                });
+            });
         }
     }
 }
