@@ -25,7 +25,7 @@ namespace DotVue
         /// <summary>
         /// Directive @auth
         /// </summary>
-        public bool Auth { get; private set; }
+        public bool IsAutenticated { get; private set; }
 
         /// <summary>
         /// Directive @role
@@ -79,7 +79,7 @@ namespace DotVue
                         this.ViewModel = directive.Value;
                         break;
                     case "auth":
-                        this.Auth = true;
+                        this.IsAutenticated = true;
                         break;
                     case "role":
                         this.Roles.Add(directive.Value);
@@ -126,10 +126,11 @@ namespace DotVue
         /// </summary>
         private KeyValuePair<string, string> ReadDirective(StringScanner s)
         {
-            if (!s.Match(@"\s*@\w+")) return new KeyValuePair<string, string>(null, null);
+            var key = s.Scan(@"\s*@(\w+)", 1).ToLower();
 
-            var key = s.Scan(@"\s*@(\w+)\s*", 1).ToLower();
-            var value = s.Scan(@".*").Trim();
+            if (key.Length == 0) return new KeyValuePair<string, string>(null, null);
+
+            var value = s.Scan(@"[\s\S]*?\n").Trim();
 
             return new KeyValuePair<string, string>(key, value);
         }

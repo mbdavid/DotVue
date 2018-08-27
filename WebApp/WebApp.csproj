@@ -12,6 +12,7 @@
     <None Remove="Components\DotLess.vue" />
     <None Remove="Components\Encoding.vue" />
     <None Remove="Components\Includes.vue" />
+    <None Remove="Components\Login.vue" />
     <None Remove="Components\Page1.vue" />
   </ItemGroup>
 
@@ -19,6 +20,7 @@
     <EmbeddedResource Include="Components\Includes.vue" />
     <EmbeddedResource Include="Components\Encoding.vue" />
     <EmbeddedResource Include="Components\DotLess.vue" />
+    <EmbeddedResource Include="Components\Login.vue" />
     <EmbeddedResource Include="Components\Page1.vue" />
   </ItemGroup>
 

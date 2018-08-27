@@ -34,6 +34,8 @@ namespace DotVue
                 Styles = discover.File.Styles.Select(x => this.Compile(x)).ToList(),
                 Scripts = discover.File.ClientScripts.Select(x => this.Compile(x)).ToList(),
                 Includes = discover.File.Includes,
+                IsAutenticated = discover.File.IsAutenticated,
+                Roles = discover.File.Roles.ToArray(),
                 ViewModelType = type,
                 Data = this.GetData(type),
                 Props = this.GetProps(type).ToList(),

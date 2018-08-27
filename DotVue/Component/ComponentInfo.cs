@@ -34,7 +34,7 @@ namespace DotVue
                 Name = name,
                 Template = 
                     $"<div style=\"background-color:#ffc;padding:15px;font-family:Arial;font-size:12px;\">" + 
-                    $"<div style='color: #800000; font-size: 22px; font-style: italic;'>[{name}] {ex.Message}</div>" + 
+                    $"<div style='color: #800000; font-size: 22px; font-style: italic;'>[{name}.vue] [{ex.GetType().Name}] {ex.Message}</div>" + 
                     $"<pre>{ex.StackTrace}</pre>" +
                     "</div>"
             };

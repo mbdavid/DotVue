@@ -96,7 +96,7 @@ namespace DotVue
 
             foreach (var c in _discovers.Values)
             {
-                if (c.File.Auth && user.Identity.IsAuthenticated == false) continue;
+                if (c.File.IsAutenticated && user.Identity.IsAuthenticated == false) continue;
                 if (c.File.Roles.Count > 0 && c.File.Roles.Any(x => user.IsInRole(x)) == false) continue;
 
                 yield return c.Name;
@@ -111,7 +111,7 @@ namespace DotVue
             if (_components.TryGetValue(name, out var c))
             {
                 if (c.IsAutenticated && user.Identity.IsAuthenticated == false) return ComponentInfo.Error(name, new HttpException(401));
-                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) ComponentInfo.Error(name, new HttpException(403));
+                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) return ComponentInfo.Error(name, new HttpException(403));
 
                 return c;
             }
@@ -124,7 +124,7 @@ namespace DotVue
                 _components[c.Name] = c;
 
                 if (c.IsAutenticated && user.Identity.IsAuthenticated == false) return ComponentInfo.Error(name, new HttpException(401));
-                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) ComponentInfo.Error(name, new HttpException(403));
+                if (c.Roles.Length > 0 && c.Roles.Any(x => user.IsInRole(x)) == false) return ComponentInfo.Error(name, new HttpException(403));
 
                 return c;
             }
