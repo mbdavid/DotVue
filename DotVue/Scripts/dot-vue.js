@@ -180,7 +180,7 @@
 
                             // run includes (js/css)
                             loadjs(obj.includes, function () {
-                                resolve(obj.options);
+                                resolve(obj.options());
                             });
                         }
                         catch (e) {
@@ -227,6 +227,8 @@
             e.src = path;
             e.async = true;
         }
+
+        log('loading: ' + path);
 
         e.onload = e.onerror = e.onbeforeload = function (ev) {
 

@@ -31,6 +31,7 @@ namespace DotVue
             {
                 Name = discover.Name,
                 Template = this.Compile(discover.File.Template),
+                InheritAttrs = discover.File.InheritAttrs ?? true,
                 Styles = discover.File.Styles.Select(x => this.Compile(x)).ToList(),
                 Scripts = discover.File.ClientScripts.Select(x => this.Compile(x)).ToList(),
                 Includes = discover.File.Includes,

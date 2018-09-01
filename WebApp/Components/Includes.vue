@@ -1,5 +1,7 @@
 ﻿@viewmodel WebApp.Components.Includes
+@inheritattrs false
 
+<!-- Dependencies -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="/demo.js"></script>
@@ -15,7 +17,7 @@
         <button type="button" class="btn btn-info">Info</button>
         <button type="button" class="btn btn-light">Light</button>
         <button type="button" class="btn btn-dark">Dark</button>
-        <hr/>
+        <hr />
         <h2>An jQuery too</h2>
         <button @click="hasJquery()">Test $</button>
     </div>
@@ -23,6 +25,9 @@
 
 
 <script>
+
+    // using jquery before load vue instance
+    $('body').css('color', 'gray');
 
     return {
         methods: {

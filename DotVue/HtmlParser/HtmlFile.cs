@@ -23,6 +23,11 @@ namespace DotVue
         public string ViewModel { get; private set; }
 
         /// <summary>
+        /// Directive @inheritAttrs
+        /// </summary>
+        public bool? InheritAttrs { get; private set; }
+
+        /// <summary>
         /// Directive @auth
         /// </summary>
         public bool IsAutenticated { get; private set; }
@@ -70,13 +75,16 @@ namespace DotVue
 
                 if (directive.Key == null) break;
 
-                switch(directive.Key)
+                switch(directive.Key.ToLower())
                 {
                     case "name":
                         this.Name = directive.Value;
                         break;
                     case "viewmodel":
                         this.ViewModel = directive.Value;
+                        break;
+                    case "inheritattrs":
+                        this.InheritAttrs = Convert.ToBoolean(directive.Value);
                         break;
                     case "auth":
                         this.IsAutenticated = true;
@@ -126,7 +134,7 @@ namespace DotVue
         /// </summary>
         private KeyValuePair<string, string> ReadDirective(StringScanner s)
         {
-            var key = s.Scan(@"\s*@(\w+)", 1).ToLower();
+            var key = s.Scan(@"\s*@(\w+)", 1);
 
             if (key.Length == 0) return new KeyValuePair<string, string>(null, null);
 

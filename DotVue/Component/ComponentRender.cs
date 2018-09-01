@@ -35,7 +35,12 @@ namespace DotVue
 
             writer.Append("return {\n");
             writer.AppendFormat(" includes: [{0}],\n", string.Join(",", _component.Includes.Select(x => $"'{x}'")));
-            writer.Append(" options: {\n");
+            writer.Append(" options: function() { return {\n");
+
+            if (_component.InheritAttrs == false)
+            {
+                writer.Append("  inheritAttrs: false,\n");
+            }
 
             if (_component.Props.Count > 0)
             {
@@ -125,9 +130,10 @@ namespace DotVue
 
             // add vpath to options
             writer.AppendFormat("  name: '{0}'\n", _component.Name);
-            writer.Append(" }\n");
 
-            writer.Append("};");
+            writer.Append(" }\n"); // return object
+            writer.Append("}\n"); // function
+            writer.Append("};"); // options
         }
     }
 }

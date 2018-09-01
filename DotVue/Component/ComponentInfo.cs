@@ -14,6 +14,7 @@ namespace DotVue
         public string[] Roles { get; set; } = new string[0];
 
         public string Template { get; set; } = "";
+        public bool InheritAttrs { get; set; } = true;
         public List<string> Styles { get; set; } = new List<string>();
         public List<string> Scripts { get; set; } = new List<string>();
         public List<string> Includes { get; set; } = new List<string>();
