@@ -66,16 +66,42 @@ namespace DotVue
 
                 foreach (var m in _component.Methods.Values)
                 {
-                    writer.AppendFormat("    {0}: function({1}) {{{2}\n      this.$update(this, '{3}', [{1}]){4};\n    }}{5}\n",
+                    writer.AppendFormat("    {0}: function({1}) {{\n",
                         m.Method.Name,
-                        string.Join(", ", m.Parameters),
-                        string.Join("\n      ", m.Pre),
+                        string.Join(", ", m.Parameters));
+
+                    foreach(var script in m.Pre)
+                    {
+                        writer.AppendFormat("      {0}\n", script);
+                    }
+
+                    if (m.Post.Length > 0)
+                    {
+                        writer.Append("      var __vm = this;\n");
+                    }
+
+                    writer.AppendFormat("      return this.$update(this, '{0}', [{1}])",
                         m.Method.Name,
-                        m.Post.Length > 0 ? "\n          .then(function(vm) { (function() {" + string.Join("\n      ", m.Post) + "\n          }).call(vm); })" : "",
-                        m == _component.Methods.Last().Value ? "" : ",");
+                        string.Join(", ", m.Parameters));
+
+                    if (m.Post.Length > 0)
+                    {
+                        writer.Append("\n        .then(function(__result) {");
+                        writer.Append("\n          (function() {");
+                        writer.AppendFormat("\n            {0}", string.Join("\n            ", m.Post));
+                        writer.Append("\n          }).call(__vm);");
+                        writer.Append("\n          return __result;");
+                        writer.Append("\n        });");
+                    }
+                    else
+                    {
+                        writer.Append(";\n");
+                    }
+
+                    writer.AppendFormat("\n    }}{0}\n", m == _component.Methods.Last().Value ? "" : ","); // method
                 }
 
-                writer.Append("  },\n");
+                writer.Append("  },\n"); // methods
             }
 
             // render def

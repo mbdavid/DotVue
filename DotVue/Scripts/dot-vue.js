@@ -39,10 +39,10 @@
 
                 setTimeout(function () {
 
-                    ajax(request, function () {
+                    ajax(request, function (result) {
 
                         // resolve request promise
-                        request.resolve(request.vm);
+                        request.resolve(result);
 
                         // if no more items in queue, stop running
                         if (_queue.length === 0) return _running = false;
@@ -70,6 +70,7 @@
                     var response = JSON.parse(xhr.responseText);
                     var update = response['update'];
                     var script = response['script'];
+                    var result = response['result'];
 
                     // server-side changes not call watch methods
                     request.vm.$updating = true;
@@ -82,6 +83,10 @@
                         request.vm.$data[key] = value;
                     });
 
+                    if (result !== null) {
+                        log('>  $result:', result);
+                    }
+
                     request.vm.$nextTick(function () {
                         request.vm.$updating = false;
                     });
@@ -93,7 +98,7 @@
                         });
                     }
 
-                    finish();
+                    finish(result);
                 };
 
                 // create form with all data
@@ -245,7 +250,7 @@
             }
 
             // handle retries in case of load failure
-            if (result === 'e' && ((numTries || 0) + 1) < 3) {
+            if (result === 'e' && (numTries || 0) + 1 < 3) {
                 return loadjs(items, fn, index, numTries + 1);
             }
 

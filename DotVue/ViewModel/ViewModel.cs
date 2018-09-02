@@ -26,9 +26,9 @@ namespace DotVue
         /// <summary>
         /// Override this method to capture execute method from client
         /// </summary>
-        protected virtual void OnExecute(MethodInfo method, object[] parameters)
+        protected virtual object OnExecute(MethodInfo method, object[] parameters)
         {
-            method.Invoke(this, parameters);
+            return method.Invoke(this, parameters);
         }
 
         public virtual void Dispose()
@@ -52,9 +52,9 @@ namespace DotVue
             return vm.ClientScript.ToString();
         }
 
-        internal static void Execute(ViewModel vm, MethodInfo method, object[] parameters)
+        internal static object Execute(ViewModel vm, MethodInfo method, object[] parameters)
         {
-            vm.OnExecute(method, parameters);
+            return vm.OnExecute(method, parameters);
         }
 
         #endregion

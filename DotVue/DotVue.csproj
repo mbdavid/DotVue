@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>DotVue</PackageId>
-    <AssemblyVersion>0.9.7.0</AssemblyVersion>
-    <FileVersion>0.9.7</FileVersion>
-    <VersionPrefix>0.9.7</VersionPrefix>
+    <AssemblyVersion>0.9.8.0</AssemblyVersion>
+    <FileVersion>0.9.8</FileVersion>
+    <VersionPrefix>0.9.8</VersionPrefix>
     <Authors>Maurício David</Authors>
     <Product>DotVue</Product>
     <Description>DotVue - Using VueJS with server-side C# view model (for ASP.NET Core)</Description>

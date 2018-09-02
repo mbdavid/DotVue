@@ -48,7 +48,7 @@ namespace DotVue
                 ViewModel.SetData(vm, original);
 
                 // if has method, call in existing vms
-                this.ExecuteMethod(method, vm, parameters, files);
+                var result = this.ExecuteMethod(method, vm, parameters, files);
 
                 // now, get viewmodel changes on data
                 var current = JObject.FromObject(vm, JsonSettings.JsonSerializer);
@@ -65,7 +65,8 @@ namespace DotVue
                     var output = new JObject
                     {
                         { "update", diff },
-                        { "script", scripts }
+                        { "script", scripts },
+                        { "result", result == null ? null : JToken.FromObject(result) }
                     };
                     
                     await output.WriteToAsync(w);
@@ -81,7 +82,7 @@ namespace DotVue
         /// <summary>
         /// Find a method in all componenets and execute if found
         /// </summary>
-        private void ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files)
+        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files)
         {
             var met = _component.Methods[name];
             var method = met.Method;
@@ -130,7 +131,7 @@ namespace DotVue
             }
 
             // now execute method inside viewmodel
-            ViewModel.Execute(vm, method, pars.ToArray());
+            return ViewModel.Execute(vm, method, pars.ToArray());
         }
 
         /// <summary>
