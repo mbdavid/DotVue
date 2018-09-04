@@ -19,7 +19,7 @@ namespace DotVue
         public List<string> Scripts { get; set; } = new List<string>();
         public List<string> Includes { get; set; } = new List<string>();
 
-        public JObject Data { get; set; } = new JObject();
+        public string JsonData { get; set; } = "{}";
         public List<string> Props { get; set; } = new List<string>();
         public Dictionary<string, ViewModelMethod> Methods { get; set; } = new Dictionary<string, ViewModelMethod>();
         public Dictionary<string, string> Watch { get; set; } = new Dictionary<string, string>();

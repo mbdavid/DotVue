@@ -30,6 +30,20 @@ namespace DotVue
         /// </summary>
         public string Extension { get; set; } = ".vue";
 
+        public JsonSerializer JsonSerializer = new JsonSerializer
+        {
+            NullValueHandling = NullValueHandling.Include,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            ContractResolver = CustomContractResolver.Instance
+        };
+
+        public JsonSerializerSettings JsonSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Include,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            ContractResolver = CustomContractResolver.Instance
+        };
+
         /// <summary>
         /// Add new assembly into vue handler components
         /// </summary>
@@ -119,7 +133,7 @@ namespace DotVue
             {
                 var loader = new ComponentLoader(service, _compilers);
 
-                c = loader.Load(d);
+                c = loader.Load(d, this.JsonSettings);
 
                 _components[c.Name] = c;
 

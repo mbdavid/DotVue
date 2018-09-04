@@ -22,11 +22,15 @@ namespace DotVue
     {
         private readonly ComponentInfo _component;
         private readonly IPrincipal _user;
+        private readonly JsonSerializerSettings _settings;
+        private readonly JsonSerializer _jsonSerializer;
 
-        internal ComponentUpdate(ComponentInfo component, IPrincipal user)
+        internal ComponentUpdate(ComponentInfo component, IPrincipal user, JsonSerializerSettings settings, JsonSerializer jsonSerializer)
         {
             _component = component;
             _user = user;
+            _settings = settings;
+            _jsonSerializer = jsonSerializer;
         }
 
         #region Update Models
@@ -34,10 +38,10 @@ namespace DotVue
         public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, TextWriter writer)
         {
             // populate my object with client $data
-            JsonConvert.PopulateObject(data, vm, JsonSettings.JsonSerializerSettings);
+            JsonConvert.PopulateObject(data, vm, _settings);
 
             // populate my object with client $props
-            JsonConvert.PopulateObject(props, vm, JsonSettings.JsonSerializerSettings);
+            JsonConvert.PopulateObject(props, vm, _settings);
 
             // parse $data as original value (before any update)
             var original = JObject.FromObject(vm);
@@ -51,7 +55,7 @@ namespace DotVue
                 var result = this.ExecuteMethod(method, vm, parameters, files);
 
                 // now, get viewmodel changes on data
-                var current = JObject.FromObject(vm, JsonSettings.JsonSerializer);
+                var current = JObject.FromObject(vm, _jsonSerializer);
 
                 // merge all scripts
                 var scripts = ViewModel.GetClientScript(vm);

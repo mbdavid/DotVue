@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace DotVue
             _compilers = compilers;
         }
 
-        public ComponentInfo Load(ComponentDiscover discover)
+        public ComponentInfo Load(ComponentDiscover discover, JsonSerializerSettings settings)
         {
             var type = discover.File.ViewModel == null ?
                 typeof(ViewModel) :
@@ -38,7 +39,7 @@ namespace DotVue
                 IsAutenticated = discover.File.IsAutenticated,
                 Roles = discover.File.Roles.ToArray(),
                 ViewModelType = type,
-                Data = this.GetData(type),
+                JsonData = this.GetJsonData(type, settings),
                 Props = this.GetProps(type).ToList(),
                 Locals = this.GetLocals(type).ToList(),
                 Computed = this.GetComputed(type).ToDictionary(x => x.Key, x => x.Value),
@@ -75,13 +76,13 @@ namespace DotVue
         }
 
         /// <summary>
-        /// Get default ViewModel data object
+        /// Get default ViewModel as json data
         /// </summary>
-        private JObject GetData(Type type)
+        private string GetJsonData(Type type, JsonSerializerSettings settings)
         {
             using (var vm = (ViewModel)ActivatorUtilities.CreateInstance(_service, type))
             {
-                return JObject.FromObject(vm, JsonSettings.JsonSerializer);
+                return JsonConvert.SerializeObject(vm, settings);
             }
         }
 

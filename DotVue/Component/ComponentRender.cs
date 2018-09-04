@@ -57,7 +57,7 @@ namespace DotVue
 
             // append template string
             writer.AppendFormat("  template: '{0}',\n", _component.Template.EncodeJavascript());
-            writer.AppendFormat("  data: function() {{\n    return {0};\n  }},\n", JsonConvert.SerializeObject(_component.Data, JsonSettings.JsonSerializerSettings));
+            writer.AppendFormat("  data: function() {{\n    return {0};\n  }},\n", _component.JsonData);
 
             // render methods
             if (_component.Methods.Count > 0)
