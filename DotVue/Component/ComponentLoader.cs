@@ -22,7 +22,7 @@ namespace DotVue
             _compilers = compilers;
         }
 
-        public ComponentInfo Load(ComponentDiscover discover, JsonSerializerSettings settings)
+        public ComponentInfo Load(ComponentDiscover discover)
         {
             var type = discover.File.ViewModel == null ?
                 typeof(ViewModel) :
@@ -39,7 +39,7 @@ namespace DotVue
                 IsAutenticated = discover.File.IsAutenticated,
                 Roles = discover.File.Roles.ToArray(),
                 ViewModelType = type,
-                JsonData = this.GetJsonData(type, settings),
+                JsonData = this.GetJsonData(type),
                 Props = this.GetProps(type).ToList(),
                 Locals = this.GetLocals(type).ToList(),
                 Computed = this.GetComputed(type).ToDictionary(x => x.Key, x => x.Value),
@@ -78,11 +78,11 @@ namespace DotVue
         /// <summary>
         /// Get default ViewModel as json data
         /// </summary>
-        private string GetJsonData(Type type, JsonSerializerSettings settings)
+        private string GetJsonData(Type type)
         {
             using (var vm = (ViewModel)ActivatorUtilities.CreateInstance(_service, type))
             {
-                return JsonConvert.SerializeObject(vm, settings);
+                return JsonConvert.SerializeObject(vm, Config.JsonSettings);
             }
         }
 

@@ -21,6 +21,21 @@ namespace DotVue
         // should be concurrent dictionary
         private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>();
 
+        // json.net settings
+        internal static JsonSerializer JsonSerializer = new JsonSerializer
+        {
+            NullValueHandling = NullValueHandling.Include,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            ContractResolver = CustomContractResolver.Instance
+        };
+
+        internal static JsonSerializerSettings JsonSettings = new JsonSerializerSettings
+        {
+            NullValueHandling = NullValueHandling.Include,
+            ObjectCreationHandling = ObjectCreationHandling.Replace,
+            ContractResolver = CustomContractResolver.Instance
+        };
+
         public Config()
         {
         }
@@ -29,20 +44,6 @@ namespace DotVue
         /// Get/Set extension used in Vue components. Default: ".vue"
         /// </summary>
         public string Extension { get; set; } = ".vue";
-
-        public JsonSerializer JsonSerializer = new JsonSerializer
-        {
-            NullValueHandling = NullValueHandling.Include,
-            ObjectCreationHandling = ObjectCreationHandling.Replace,
-            ContractResolver = CustomContractResolver.Instance
-        };
-
-        public JsonSerializerSettings JsonSettings = new JsonSerializerSettings
-        {
-            NullValueHandling = NullValueHandling.Include,
-            ObjectCreationHandling = ObjectCreationHandling.Replace,
-            ContractResolver = CustomContractResolver.Instance
-        };
 
         /// <summary>
         /// Add new assembly into vue handler components
@@ -133,7 +134,7 @@ namespace DotVue
             {
                 var loader = new ComponentLoader(service, _compilers);
 
-                c = loader.Load(d, this.JsonSettings);
+                c = loader.Load(d);
 
                 _components[c.Name] = c;
 

@@ -86,7 +86,7 @@ namespace DotVue
 
                 var component = _config.Load(user, context.RequestServices, name);
 
-                var update = new ComponentUpdate(component, user, _config.JsonSettings, _config.JsonSerializer);
+                var update = new ComponentUpdate(component, user);
 
                 var writer = new StreamWriter(response.Body);
 
