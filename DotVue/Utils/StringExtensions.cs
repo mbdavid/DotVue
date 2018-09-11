@@ -36,7 +36,7 @@ namespace DotVue
             }
         }
 
-        public static string CamelCase(this string str)
+        public static string ToCamelCase(this string str)
         {
             if (str.Length < 2) return str.ToLower();
 

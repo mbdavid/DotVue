@@ -22,7 +22,6 @@ namespace DotVue
         public string JsonData { get; set; } = "{}";
         public List<string> Props { get; set; } = new List<string>();
         public Dictionary<string, ViewModelMethod> Methods { get; set; } = new Dictionary<string, ViewModelMethod>();
-        public Dictionary<string, string> Watch { get; set; } = new Dictionary<string, string>();
         public Dictionary<string, string> Computed { get; set; } = new Dictionary<string, string>();
         public List<string> Locals { get; set; } = new List<string>();
 

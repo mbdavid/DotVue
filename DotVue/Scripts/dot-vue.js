@@ -254,6 +254,9 @@
                 return loadjs(items, fn, index, numTries + 1);
             }
 
+            // add into cache
+            _loaded[path] = true;
+
             // execute next
             return loadjs(items, fn, index + 1);
         };

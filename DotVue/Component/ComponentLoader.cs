@@ -43,7 +43,6 @@ namespace DotVue
                 Props = this.GetProps(type).ToList(),
                 Locals = this.GetLocals(type).ToList(),
                 Computed = this.GetComputed(type).ToDictionary(x => x.Key, x => x.Value),
-                Watch = this.GetWatch(type).ToDictionary(x => x.Key, x => x.Value),
                 Methods = this.GetMethods(type).ToDictionary(x => x.Method.Name, x => x)
             };
 
@@ -94,7 +93,7 @@ namespace DotVue
             return type
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.GetCustomAttribute<PropAttribute>() != null)
-                .Select(x => x.Name);
+                .Select(x => x.Name.ToCamelCase());
         }
 
         /// <summary>
@@ -117,17 +116,6 @@ namespace DotVue
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Select(x => new KeyValuePair<string, string>(x.Name, x.GetCustomAttribute<ComputedAttribute>(true)?.Code))
                 .Where(x => x.Value != null);
-        }
-
-        /// <summary>
-        /// Get all properties defined as [Computed] attribute (PropertyWatched, MethodName)
-        /// </summary>
-        private IEnumerable<KeyValuePair<string, string>> GetWatch(Type type)
-        {
-            return type
-                .GetMethods(BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly)
-                .Where(x => x.Name.EndsWith("_Watch", StringComparison.InvariantCultureIgnoreCase) || x.GetCustomAttribute<WatchAttribute>() != null)
-                .Select(x => new KeyValuePair<string, string>(x.GetCustomAttribute<WatchAttribute>()?.Name ?? x.Name.Substring(0, x.Name.LastIndexOf("_")), x.Name));
         }
 
         /// <summary>
@@ -167,6 +155,9 @@ namespace DotVue
             var post = scripts.Where(x => !string.IsNullOrWhiteSpace(x.Post)).Select(x => x.Post).ToArray();
             var parameters = m.GetParameters().Select(x => x.Name).ToArray();
             var roles = autorize?.Roles ?? new string[0];
+            var watch = m.Name.EndsWith("_Watch", StringComparison.InvariantCultureIgnoreCase) || m.GetCustomAttribute<WatchAttribute>() != null ?
+                m.GetCustomAttribute<WatchAttribute>()?.Name ?? m.Name.Substring(0, m.Name.LastIndexOf("_")) :
+                null;
 
             return new ViewModelMethod
             {
@@ -174,6 +165,7 @@ namespace DotVue
                 Pre = pre,
                 Post = post,
                 Parameters = parameters,
+                Watch = watch,
                 IsAuthenticated = autorize != null,
                 Roles = roles
             };

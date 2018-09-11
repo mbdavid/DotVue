@@ -44,7 +44,7 @@ namespace DotVue
 
             if (_component.Props.Count > 0)
             {
-                writer.AppendFormat("  props: [{0}],\n", string.Join(", ", _component.Props.Select(x => "'" + x.CamelCase() + "'")));
+                writer.AppendFormat("  props: [{0}],\n", string.Join(", ", _component.Props.Select(x => "'" + x.ToCamelCase() + "'")));
             }
 
             // only call Created method if created was override in component
@@ -95,7 +95,7 @@ namespace DotVue
                     }
                     else
                     {
-                        writer.Append(";\n");
+                        writer.Append(";");
                     }
 
                     writer.AppendFormat("\n    }}{0}\n", m == _component.Methods.Last().Value ? "" : ","); // method
@@ -121,16 +121,18 @@ namespace DotVue
             }
 
             // render watchs
-            if (_component.Watch.Count > 0)
+            var watch = _component.Methods.Where(x => x.Value.Watch != null).ToArray();
+
+            if (watch.Length > 0)
             {
                 writer.Append("  watch: {\n");
 
-                foreach (var w in _component.Watch)
+                foreach (var w in watch)
                 {
                     writer.AppendFormat("    {0}: {{\n      handler: function(v, o) {{\n        if (this.$updating) return false;\n        this.{1}(v, o);\n      }},\n      deep: true\n    }}{2}\n",
-                        w.Key, 
-                        w.Value,
-                        w.Key == _component.Watch.Last().Key ? "" : ",");
+                        w.Value.Watch, 
+                        w.Value.Method.Name,
+                        w.Key == watch.Last().Key ? "" : ",");
                 }
 
                 writer.Append("  },\n");

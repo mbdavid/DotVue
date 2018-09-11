@@ -11,5 +11,7 @@
                 @click="Id++">
             ClickMe-Client
         </button>
+        <hr/>
+        <input v-model="Text" />
     </div>
 </template>
