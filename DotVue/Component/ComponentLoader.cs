@@ -98,7 +98,7 @@ namespace DotVue
             {
                 NullValueHandling = NullValueHandling.Include,
                 ObjectCreationHandling = ObjectCreationHandling.Replace,
-                ContractResolver = new PropertyOnlyContractResolver
+                ContractResolver = new CustomContractResolver
                 {
                     NamingStrategy = new CamelCaseNamingStrategy()
                 }

@@ -109,32 +109,15 @@ namespace DotVue
                 var method = request.Form["method"];
                 var parameters = JArray.Parse(request.Form["params"]).ToArray();
 
-                try
-                {
-                    var component = _config.GetComponent(name);
+                var component = _config.GetComponent(name);
 
-                    var update = new ComponentUpdate(component, user);
+                var update = new ComponentUpdate(component, user);
 
-                    var writer = new StreamWriter(response.Body);
+                var writer = new StreamWriter(response.Body);
 
-                    var vm = (ViewModel)ActivatorUtilities.CreateInstance(context.RequestServices, component.ViewModelType);
+                var vm = (ViewModel)ActivatorUtilities.CreateInstance(context.RequestServices, component.ViewModelType);
 
-                    await update.UpdateModel(vm, data, props, method, parameters, request.Form.Files, writer);
-                }
-                catch (Exception ex)
-                {
-                    if (ex is TargetInvocationException) ex = ex.InnerException;
-
-                    response.StatusCode = 500;
-
-                    await response.WriteAsync(JsonConvert.SerializeObject(new
-                    {
-                        type = ex.GetType().Name,
-                        message = ex.Message,
-                        source = ex.Source,
-                        stacktrace = ex.StackTrace
-                    }));
-                }
+                await update.UpdateModel(vm, data, props, method, parameters, request.Form.Files, writer);
             }
         }
     }

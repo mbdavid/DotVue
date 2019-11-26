@@ -119,16 +119,14 @@ namespace DotVue
                 {
                     var name = rp.Key.ToCamelCase();
 
-                    _writer.Append($"    this.{name} = this.$route.params.{name};\n");
-                    _writer.Append($"    if (this.{name} === undefined) this.{name} = {JsonConvert.SerializeObject(rp.Value)};\n");
+                    _writer.Append($"    if (this.$route.params.{name} !== undefined) this.{name} = this.$route.params.{name};\n");
                 }
 
                 foreach (var qs in component.QueryString)
                 {
                     var name = qs.Key.ToCamelCase();
 
-                    _writer.Append($"    this.{name} = this.$route.query.{name};\n");
-                    _writer.Append($"    if (this.{name} === undefined) this.{name} = {JsonConvert.SerializeObject(qs.Value)};\n");
+                    _writer.Append($"    if (this.$route.query.{name} !== undefined) this.{name} = this.$route.query.{name};\n");
                 }
 
                 if (!string.IsNullOrEmpty(component.Scripts))

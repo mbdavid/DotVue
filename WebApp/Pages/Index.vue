@@ -16,7 +16,7 @@
     <hr/>
     {{text}} | Code: {{ code }}
     <hr/>
-    <button @click="showCode()">ShowCode</button>
+    <button @click="showCode()">ShowCode (with confirm)</button>
 </div>
 
 <style scoped>
@@ -29,8 +29,13 @@
 
 <script>
 
-    this.$on('clickMe:after', function (r) {
-        console.log('click after - result is ' + r)
+    this.$on('showCode:before', function (r) {
+        if (confirm('Submit?')) {
+            r.resolve();
+        }
+        else {
+            r.reject();
+        }
     })
 
 </script>
