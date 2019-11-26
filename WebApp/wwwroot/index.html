@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=9;IE=10;IE=Edge,chrome=1" />
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script src="dot-vue.js"></script>
 </head>
 <body>
 
@@ -14,10 +15,20 @@
     <hr/>
 
     <div id="app">
-        Loading...
+        <router-view></router-view>
     </div>
 
-    <script src="bootstrap.vue?id=app"></script>
+    <script src="bootstrap.vue"></script>
+
+    <script>
+
+        new Vue({
+            el: '#app',
+            router: DotVue.router
+        });
+
+    </script>
+
 
 </body>
 </html>

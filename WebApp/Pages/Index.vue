@@ -1,5 +1,4 @@
-﻿@viewmodel
-@page /
+﻿@page /
 @ascync
 
 <div class="item">

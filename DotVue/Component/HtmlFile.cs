@@ -54,7 +54,7 @@ namespace DotVue
         {
             var s = new StringScanner(content, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
-            this.Directives = this.ReadDirectives(s).ToDictionary(x => x.Key, x => x.Value);
+            this.Directives = this.ReadDirectives(s).ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
 
             var scoped = false;
             var scopedId = "s-" + Guid.NewGuid().ToString("d").Substring(0, 6);
@@ -96,16 +96,16 @@ namespace DotVue
                 {
                     this.Template.Append(s.Read(1));
                 }
+            }
 
-                // change template if scoped was used
-                if (scoped)
-                {
-                    var htm = Regex.Replace(this.Template.ToString(), @"^\s*(<[\w-]+)", $"$1 {scopedId}");
+            // change template if scoped was used
+            if (scoped)
+            {
+                var htm = Regex.Replace(this.Template.ToString(), @"^\s*(<[\w-]+)", $"$1 {scopedId}");
 
-                    this.Template.Clear();
+                this.Template.Clear();
 
-                    this.Template.Append(htm);
-                }
+                this.Template.Append(htm);
             }
         }
 

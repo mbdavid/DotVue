@@ -3,29 +3,32 @@
 //
 (function () {
 
-    // register vue plugin to server call (vue.$update)
+    // register vue plugin to server call (vue.$server)
     const DotVue = {
         install: function (Vue, options) {
 
             var _queue = [];
             var _running = false;
 
-            // in watch, test before call if field are not been updated
-            Vue.prototype.$updating = false;
-
             // request new server call
-            Vue.prototype.$update = function $update(vm, name, params) {
+            Vue.prototype.$server = function $server(vm, name, params) {
 
-                return new Promise(function (resolve) {
+                return new Promise(function (resolve, reject) {
 
                     _queue.push({
                         vm: vm,
                         name: name,
                         params: params || [],
-                        resolve: resolve
+                        resolve: resolve,
+                        reject: reject
                     });
 
                     if (!_running) nextQueue();
+
+                }).then(function (r) {
+
+                    vm.$emit(name + ':after', r, ...params);
+
                 });
             };
 
@@ -36,6 +39,8 @@
 
                 // get first request from queue
                 var request = _queue.shift();
+
+                //CHAMA BEFORE
 
                 setTimeout(function () {
 
@@ -50,7 +55,7 @@
                         nextQueue();
                     });
 
-                }, 1);
+                });
             }
 
             // Execute ajax POST request for update model
@@ -64,6 +69,7 @@
                         _queue = [];
                         _running = false;
                         request.vm.$el.innerHTML = xhr.responseText;
+                        request.reject();
                         return;
                     }
 
@@ -71,9 +77,6 @@
                     var update = response['update'];
                     var script = response['script'];
                     var result = response['result'];
-
-                    // server-side changes not call watch methods
-                    request.vm.$updating = true;
 
                     Object.keys(update).forEach(function (key) {
                         var value = update[key];
@@ -86,10 +89,6 @@
                     if (result !== null) {
                         log('>  $result:', result);
                     }
-
-                    request.vm.$nextTick(function () {
-                        request.vm.$updating = false;
-                    });
 
                     if (script) {
                         log('>  $eval = ', script);
@@ -106,22 +105,7 @@
 
                 form.append('method', request.name);
                 form.append('props', JSON.stringify(request.vm.$props || {}));
-
-                // add data (check if has local properties)
-                if (request.vm.$options.local.length === 0) {
-                    form.append('data', JSON.stringify(request.vm.$data || {}));
-                }
-                else {
-                    // create a simple copy
-                    var copy = Object.assign({}, request.vm.$data);
-
-                    // and remove local propertis before send to server
-                    request.vm.$options.local.forEach(function (key) {
-                        delete copy[key];
-                    });
-
-                    form.append('data', JSON.stringify(copy));
-                }
+                form.append('data', JSON.stringify(request.vm.$data || {}));
 
                 // upload file
                 request.params.forEach(function (value, index, arr) {
@@ -202,75 +186,6 @@
     };
 
     Vue.use(DotVue);
-
-    var _loaded = {};
-
-    // very simple queue script/css loader, based on loadjs (https://github.com/muicss/loadjs/blob/master/dist/loadjs.js)
-    function loadjs(items, fn, index, numTries) {
-
-        index = index || 0;
-
-        // finish queue
-        if (items.length === index) return fn();
-
-        var path = resolveUrl(items[index]);
-
-        // if already loaded
-        if (_loaded[path]) return loadjs(items, fn, index + 1);
-
-        var isCss = /(^css!|\.css$)/.test(path);
-        var pathStripped = path.replace(/^(css|js)!/, '');
-        var e = null;
-
-        if (isCss) {
-            e = document.createElement('link');
-            e.rel = 'stylesheet';
-            e.href = pathStripped;
-        }
-        else {
-            e = document.createElement('script');
-            e.src = path;
-            e.async = true;
-        }
-
-        log('loading: ' + path);
-
-        e.onload = e.onerror = e.onbeforeload = function (ev) {
-
-            var result = ev.type[0];
-
-            // note: The following code isolates IE using `hideFocus` and treats empty stylesheets as failures to get around lack of onerror support
-            if (isCss && 'hideFocus' in e) {
-                try {
-                    if (!e.sheet.cssText.length) result = 'e';
-                } catch (x) {
-                    // sheets objects created from load errors don't allow access to `cssText`
-                    result = 'e';
-                }
-            }
-
-            // handle retries in case of load failure
-            if (result === 'e' && (numTries || 0) + 1 < 3) {
-                return loadjs(items, fn, index, numTries + 1);
-            }
-
-            // add into cache
-            _loaded[path] = true;
-
-            // execute next
-            return loadjs(items, fn, index + 1);
-        };
-
-        // add into html document
-        document.head.appendChild(e);
-    }
-
-    // get full path from url
-    function resolveUrl(url) {
-        var a = document.createElement('a');
-        a.href = url;
-        return a.href;
-    }
 
     // execute console log without showing file: http://stackoverflow.com/questions/34762774/how-to-hide-source-of-log-messages-in-console
     function log() {

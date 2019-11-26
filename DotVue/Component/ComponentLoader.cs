@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace DotVue
 {
@@ -32,8 +33,8 @@ namespace DotVue
             // try read file from local disk (for hot reload)
             var localFile = Path.Combine(_root + @"\..\",
                 assembly.GetName().Name +
-                    resourceName.Substring(assembly.GetName().Name.Length, resourceName.Length - assembly.GetName().Name.Length - 3).Replace(".", "\\")) +
-                ".html";
+                    resourceName.Substring(assembly.GetName().Name.Length, resourceName.Length - assembly.GetName().Name.Length - 4).Replace(".", "\\")) +
+                ".vue";
 
             var content = File.Exists(localFile) ?
                 File.ReadAllText(localFile) :
@@ -43,19 +44,17 @@ namespace DotVue
             var name = html.GetDirective("name") ?? Path.GetFileNameWithoutExtension(localFile);
             var component = new ComponentInfo(name);
 
-            var viewModelName = html.GetDirective("viewmodel");
-
-            if (viewModelName == null)
+            if (html.Directives.TryGetValue("viewmodel", out var viewModel))
             {
-                // try guess viewModel based on resource name
-                component.ViewModelType = assembly.GetType(resourceName.Substring(0, resourceName.Length - 5)) ?? typeof(ViewModel);
+                component.ViewModelType = assembly.GetType(viewModel, true);
             }
             else
             {
-                component.ViewModelType = assembly.GetType(viewModelName, true);
+                // try guess viewModel based on resource name
+                component.ViewModelType = assembly.GetType(resourceName.Substring(0, resourceName.Length - 4)) ?? typeof(ViewModel);
             }
 
-            component.IsAsync = html.GetDirective("async") != null;
+            component.IsAsync = html.Directives.ContainsKey("async");
 
             if (html.Directives.TryGetValue("page", out var route))
             {
@@ -65,7 +64,7 @@ namespace DotVue
 
             component.Template = html.Template.ToString();
             component.Styles = html.Styles.ToString();
-            component.Scripts = html.Scripts.ToString();
+            component.Scripts = html.Scripts.ToString() + this.GetScriptAttr(component.ViewModelType);
             component.Mixins = html.Mixins;
 
             using (var instance = (ViewModel)ActivatorUtilities.CreateInstance(_service, component.ViewModelType))
@@ -74,6 +73,8 @@ namespace DotVue
                 component.Props = this.GetProps(component.ViewModelType, instance);
                 component.Methods = this.GetMethods(component.ViewModelType).ToDictionary(x => x.Method.Name, x => x, StringComparer.OrdinalIgnoreCase);
             }
+
+            component.InheritAttrs = !component.Template.Contains("v-bind=\"$attrs\"");
 
             component.IsAuthenticated = component.ViewModelType.GetCustomAttribute<AutorizeAttribute>() != null;
 
@@ -161,6 +162,29 @@ namespace DotVue
                 IsAuthenticated = autorize != null,
                 Roles = roles
             };
+        }
+
+        /// <summary>
+        /// Get all scripts attribute on this class
+        /// </summary>
+        private string GetScriptAttr(Type type)
+        {
+            var script = new StringBuilder();
+
+            foreach (var attr in type.GetCustomAttributes<ScriptAttribute>(true))
+            {
+                script.AppendLine(attr.Code.Replace("{name}", type.Name.ToCamelCase()));
+            }
+
+            foreach (var member in type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(x => x.GetCustomAttributes<ScriptAttribute>(true).Count() > 0))
+            {
+                foreach (var attr in member.GetCustomAttributes<ScriptAttribute>(true))
+                {
+                    script.AppendLine(attr.Code.Replace("{name}", member.Name.ToCamelCase()));
+                }
+            }
+
+            return script.ToString();
         }
     }
 }

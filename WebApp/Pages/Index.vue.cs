@@ -9,11 +9,15 @@ namespace WebApp.Pages
 
         public int Id { get; set; } = 15;
 
+        [Prop]
+        public string Codigo = "ok";
+
         protected override void OnCreated()
         {
             this.Id = 100;
         }
 
+        //[Script("this.$on('{name}:before', function(p) { });")]
         public void ClickMe(int step)
         {
             this.Id += step;

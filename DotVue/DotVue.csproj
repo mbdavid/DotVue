@@ -32,19 +32,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Scripts\dot-vue.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Scripts\dot-vue.js" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Scripts\" />
     <Folder Include="ViewModel\" />
   </ItemGroup>
 

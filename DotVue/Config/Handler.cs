@@ -43,18 +43,27 @@ namespace DotVue
             {
                 response.ContentType = "text/javascript";
                 
-                // output javascript lib
-                var js = new StreamReader(typeof(Handler)
-                    .Assembly
-                    .GetManifestResourceStream("DotVue.Scripts.dot-vue.js"))
-                    .ReadToEnd();
+                var writer = new StringBuilder();
+                var render = new ComponentRender(writer);
                 
-                var writer = new StringBuilder(js);
-                
-                writer.Append("\n\n//\n// Registering Vue Components\n//\n");
+               // writer.Append("//\n// Registering Vue Components\n//\n");
 
                 // discover all components
                 _config.Discover(context.RequestServices);
+
+                foreach (var component in _config.GetComponents())
+                {
+                    writer.Append($"const {component.Name} = ");
+                    render.RenderComponent(component);
+                }
+
+                // render.RenderRegister(_config.GetComponents().Where(x => x.IsPage == false));
+                // render.RenderRoutes(_config.GetComponents().Where(x => x.IsPage == true));
+                // 
+                // render.RegisterStyles(_config.GetComponents());
+
+                await response.WriteAsync(writer.ToString());
+
 
             }
             else if (isLoad)

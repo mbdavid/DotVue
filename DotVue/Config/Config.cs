@@ -14,19 +14,12 @@ namespace DotVue
 {
     public class Config
     {
-        private readonly List<Assembly> _assemblies = new List<Assembly>();
+        private readonly Assembly[] _assemblies;
         private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>();
 
-        public Config()
+        public Config(Assembly[] assemblies)
         {
-        }
-
-        /// <summary>
-        /// Add new assembly into vue handler components
-        /// </summary>
-        public void AddAssembly(Assembly assembly)
-        {
-            _assemblies.Add(assembly);
+            _assemblies = assemblies;
         }
 
         /// <summary>

@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\dot-vue.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Pages\DotLess.vue" />
     <None Remove="Pages\Encoding.vue" />
     <None Remove="Pages\Includes.vue" />
@@ -14,6 +18,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="Pages\Index.vue" />
+    <EmbeddedResource Include="wwwroot\dot-vue.js" />
   </ItemGroup>
 
   <ItemGroup>

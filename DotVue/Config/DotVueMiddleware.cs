@@ -17,7 +17,7 @@ namespace DotVue
     {
         public static IApplicationBuilder UseDotVue(this IApplicationBuilder builder, params Assembly[] assemblies)
         {
-            var config = new Config();
+            var config = new Config(assemblies);
 
             return builder.MapWhen(c => c.Request.Path.Value.EndsWith(".vue"), app =>
             {
