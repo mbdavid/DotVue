@@ -8,10 +8,10 @@ using Newtonsoft.Json.Linq;
 namespace DotVue
 {
     /// <summary>
-    /// Define C# class field as an Vue props - do not update this value in server-side
+    /// Define C# class field as an route parameter - do not update this value in server-side
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class PropAttribute : Attribute
+    public class RouteParamAttribute : Attribute
     {
     }
 }

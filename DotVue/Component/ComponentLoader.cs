@@ -62,7 +62,7 @@ namespace DotVue
                 component.Route = route;
             }
 
-            component.Template = html.Template.ToString();
+            component.Template = html.Template.ToString().Trim();
             component.Styles = html.Styles.ToString();
             component.Scripts = html.Scripts.ToString() + this.GetScriptAttr(component.ViewModelType);
             component.Mixins = html.Mixins;
@@ -70,8 +70,11 @@ namespace DotVue
             using (var instance = (ViewModel)ActivatorUtilities.CreateInstance(_service, component.ViewModelType))
             {
                 component.JsonData = this.GetJsonData(instance);
-                component.Props = this.GetProps(component.ViewModelType, instance);
                 component.Methods = this.GetMethods(component.ViewModelType).ToDictionary(x => x.Method.Name, x => x, StringComparer.OrdinalIgnoreCase);
+
+                component.Props = this.GetField<PropAttribute>(component.ViewModelType, instance);
+                component.RouteParams = this.GetField<RouteParamAttribute>(component.ViewModelType, instance);
+                component.QueryString = this.GetField<QueryStringAttribute>(component.ViewModelType, instance);
             }
 
             component.InheritAttrs = !component.Template.Contains("v-bind=\"$attrs\"");
@@ -105,13 +108,14 @@ namespace DotVue
         }
 
         /// <summary>
-        /// Get all properties defined as [Prop] attribute
+        /// Get all field defined as [Prop, RouteParam, QueryString] attribute
         /// </summary>
-        private Dictionary<string, object> GetProps(Type type, ViewModel instance)
+        private Dictionary<string, object> GetField<T>(Type type, ViewModel instance)
+            where T : Attribute
         {
             return type
                 .GetFields(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.GetCustomAttribute<PropAttribute>() != null)
+                .Where(x => x.GetCustomAttribute<T>() != null)
                 .ToDictionary(x => x.Name, x => x.GetValue(instance), StringComparer.OrdinalIgnoreCase);
         }
 

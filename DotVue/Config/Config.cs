@@ -40,10 +40,7 @@ namespace DotVue
                     {
                         var component = loader.Load(assembly, file);
 
-                        if (component != null)
-                        {
-                            _components[component.Name] = component;
-                        }
+                        _components[component.Name] = component;
                     }
                     catch (Exception ex)
                     {

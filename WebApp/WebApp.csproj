@@ -14,9 +14,11 @@
     <None Remove="Pages\Includes.vue" />
     <None Remove="Pages\Index.vue" />
     <None Remove="Pages\Login.vue" />
+    <None Remove="Pages\Page1.vue" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Pages\Page1.vue" />
     <EmbeddedResource Include="Pages\Index.vue" />
     <EmbeddedResource Include="wwwroot\dot-vue.js" />
   </ItemGroup>

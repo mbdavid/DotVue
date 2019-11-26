@@ -8,13 +8,21 @@
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
     <script src="dot-vue.js"></script>
+    <style>
+        .router-link-exact-active {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
     <h1>DotVue Examples (with .vue and .vue.cs files)</h1>
-    <hr/>
 
     <div id="app">
+        <router-link to="/">Index</router-link> |
+        <router-link to="/page1/123">Page1</router-link> |
+        <router-link to="/page1/456?p=1">Page1?p=1</router-link>
+        <hr />
         <router-view></router-view>
     </div>
 
@@ -24,8 +32,9 @@
 
         new Vue({
             el: '#app',
-            router: DotVue.router
+            router: new VueRouter({ routes: DotVue.routes })
         });
+
 
     </script>
 

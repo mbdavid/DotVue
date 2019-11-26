@@ -11,14 +11,18 @@
             var _running = false;
 
             // request new server call
-            Vue.prototype.$server = function $server(vm, name, params) {
+            Vue.prototype.$server = function $server(name, ...params) {
+
+                var vm = this;
 
                 return new Promise(function (resolve, reject) {
+
+                    params = params || [];
 
                     _queue.push({
                         vm: vm,
                         name: name,
-                        params: params || [],
+                        params: params,
                         resolve: resolve,
                         reject: reject
                     });
@@ -42,19 +46,15 @@
 
                 //CHAMA BEFORE
 
-                setTimeout(function () {
+                ajax(request, function (result) {
 
-                    ajax(request, function (result) {
+                    // resolve request promise
+                    request.resolve(result);
 
-                        // resolve request promise
-                        request.resolve(result);
+                    // if no more items in queue, stop running
+                    if (_queue.length === 0) return _running = false;
 
-                        // if no more items in queue, stop running
-                        if (_queue.length === 0) return _running = false;
-
-                        nextQueue();
-                    });
-
+                    nextQueue();
                 });
             }
 
@@ -132,27 +132,8 @@
                 xhr.send(form);
             }
 
-            // Add css style function into vue instance
-            Vue.$addStyle = function (css) {
-
-                var head = document.head || document.getElementsByTagName('head')[0];
-                var style = document.createElement('style');
-
-                style.type = 'text/css';
-                if (style.styleSheet) {
-                    style.styleSheet.cssText = css;
-                } else {
-                    style.appendChild(document.createTextNode(css));
-                }
-
-                head.appendChild(style);
-            };
-
             // Load async component from current page
-            Vue.$loadComponent = function $loadComponent(name) {
-
-                // if name is a function, just execute and return component
-                if (typeof name === 'function') return name();
+            DotVue.async = function load(name) {
 
                 return function (resolve, reject) {
                     var xhr = new XMLHttpRequest();
@@ -163,14 +144,8 @@
                             return reject();
                         }
                         try {
-                            var fn = new Function(xhr.responseText);
-
-                            var obj = fn();
-
-                            // run includes (js/css)
-                            loadjs(obj.includes, function () {
-                                resolve(obj.options());
-                            });
+                            var fn = new Function('return ' + xhr.responseText);
+                            resolve(fn());
                         }
                         catch (e) {
                             alert(e);
@@ -186,6 +161,8 @@
     };
 
     Vue.use(DotVue);
+
+    window.DotVue = DotVue;
 
     // execute console log without showing file: http://stackoverflow.com/questions/34762774/how-to-hide-source-of-log-messages-in-console
     function log() {

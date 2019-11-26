@@ -1,163 +1,174 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Collections.Specialized;
-//using System.IO;
-//using System.Linq;
-//using System.Reflection;
-//using System.Security.Principal;
-//using System.Text;
-//using System.Text.RegularExpressions;
-//using System.Threading.Tasks;
-//using System.Web;
-//using Microsoft.AspNetCore.Http;
-//using Newtonsoft.Json;
-//using Newtonsoft.Json.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Security.Principal;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 
-//namespace DotVue
-//{
-//    /// <summary>
-//    /// Execute requested method call and update viewmodel
-//    /// </summary>
-//    public class ComponentUpdate
-//    {
-//        private readonly ComponentInfo _component;
-//        private readonly IPrincipal _user;
+namespace DotVue
+{
+    /// <summary>
+    /// Execute requested method call and update viewmodel
+    /// </summary>
+    public class ComponentUpdate
+    {
+        private readonly ComponentInfo _component;
+        private readonly IPrincipal _user;
 
-//        internal ComponentUpdate(ComponentInfo component, IPrincipal user)
-//        {
-//            _component = component;
-//            _user = user;
-//        }
+        internal ComponentUpdate(ComponentInfo component, IPrincipal user)
+        {
+            _component = component;
+            _user = user;
+        }
 
-//        #region Update Models
+        #region Update Models
 
-//        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, TextWriter writer)
-//        {
-//            // populate my object with client $data
-//            JsonConvert.PopulateObject(data, vm, Config.JsonSettings);
+        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, TextWriter writer)
+        {
+            var jsonSerializer = new JsonSerializer
+            {
+                NullValueHandling = NullValueHandling.Include,
+                ObjectCreationHandling = ObjectCreationHandling.Replace,
+                ContractResolver = new PropertyOnlyContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                }
+            };
 
-//            // populate my object with client $props
-//            JsonConvert.PopulateObject(props, vm, Config.JsonSettings);
+            // populate my object with client $data
+            JsonConvert.PopulateObject(data, vm);
 
-//            // parse $data as original value (before any update)
-//            var original = JObject.FromObject(vm);
+            // populate my object with client $props
+            JsonConvert.PopulateObject(props, vm);
 
-//            try
-//            {
-//                // set viewmodel request data
-//                ViewModel.SetData(vm, original);
+            // parse $data as original value (before any update)
+            var original = JObject.FromObject(vm, jsonSerializer);
 
-//                // if has method, call in existing vms
-//                var result = this.ExecuteMethod(method, vm, parameters, files);
+            try
+            {
+                // set viewmodel request data
+                ViewModel.SetData(vm, original);
 
-//                // now, get viewmodel changes on data
-//                var current = JObject.FromObject(vm, Config.JsonSerializer);
+                // if has method, call in existing vms
+                var result = this.ExecuteMethod(method, vm, parameters, files);
 
-//                // merge all scripts
-//                var scripts = ViewModel.GetClientScript(vm);
+                // now, get viewmodel changes on data
+                var current = JObject.FromObject(vm, jsonSerializer);
 
-//                // detect changed from original to current data and send back to browser
-//                var diff = this.GetDiff(original, current);
+                // merge all scripts
+                var scripts = ViewModel.GetClientScript(vm);
 
-//                // write changes to writer
-//                using (var w = new JsonTextWriter(writer))
-//                {
-//                    var output = new JObject
-//                    {
-//                        { "update", diff },
-//                        { "script", scripts },
-//                        { "result", result == null ? null : JToken.FromObject(result) }
-//                    };
-                    
-//                    await output.WriteToAsync(w);
-//                }
-//            }
-//            finally
-//            {
-//                // dispose vm
-//                vm.Dispose();
-//            }
-//        }
+                // detect changed from original to current data and send back to browser
+                var diff = this.GetDiff(original, current);
 
-//        /// <summary>
-//        /// Find a method in all componenets and execute if found
-//        /// </summary>
-//        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files)
-//        {
-//            var met = _component.Methods[name];
-//            var method = met.Method;
-//            var pars = new List<object>();
-//            var index = 0;
+                // write changes to writer
+                using (var w = new JsonTextWriter(writer))
+                {
+                    var output = new JObject
+                    {
+                        { "update", diff },
+                        { "script", scripts },
+                        { "result", result == null ? null : JToken.FromObject(result) }
+                    };
 
-//            // check for permissions
-//            if (met.IsAuthenticated && _user.Identity.IsAuthenticated == false) throw new HttpException(401);
-//            if (met.Roles.Length > 0 && met.Roles.Any(x => _user.IsInRole(x)) == false) throw new HttpException(403, $"Forbidden. This method requires one of this roles: `{string.Join("`, `", met.Roles)}`");
+                    await output.WriteToAsync(w);
+                }
+            }
+            finally
+            {
+                // dispose vm
+                vm.Dispose();
+            }
+        }
 
-//            // convert each parameter as declared method in type
-//            foreach (var p in method.GetParameters())
-//            {
-//                var token = parameters[index++];
+        /// <summary>
+        /// Find a method in all componenets and execute if found
+        /// </summary>
+        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files)
+        {
+            var met = _component.Methods[name];
+            var method = met.Method;
+            var pars = new List<object>();
+            var index = 0;
 
-//                if (p.ParameterType == typeof(IFormFile))
-//                {
-//                    var value = ((JValue)token).Value.ToString();
+            // check for permissions
+            if (met.IsAuthenticated && _user.Identity.IsAuthenticated == false) throw new HttpException(401);
+            if (met.Roles.Length > 0 && met.Roles.Any(x => _user.IsInRole(x)) == false) throw new HttpException(403, $"Forbidden. This method requires one of this roles: `{string.Join("`, `", met.Roles)}`");
 
-//                    pars.Add(files.GetFile(value));
-//                }
-//                else if (p.ParameterType == typeof(IList<IFormFile>))
-//                {
-//                    var value = ((JValue)token).Value.ToString();
-                
-//                    pars.Add(files.GetFiles(value));
-//                }
-//                else if (token.Type == JTokenType.Object)
-//                {
-//                    var obj = ((JObject)token).ToObject(p.ParameterType);
+            // convert each parameter as declared method in type
+            foreach (var p in method.GetParameters())
+            {
+                var token = parameters[index++];
 
-//                    pars.Add(obj);
-//                }
-//                else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
-//                {
-//                    var value = ((JValue)token).Value.ToString();
+                if (p.ParameterType == typeof(IFormFile))
+                {
+                    var value = ((JValue)token).Value.ToString();
 
-//                    pars.Add(Enum.Parse(p.ParameterType, value));
-//                }
-//                else
-//                {
-//                    var value = ((JValue)token).Value;
+                    pars.Add(files.GetFile(value));
+                }
+                else if (p.ParameterType == typeof(IList<IFormFile>))
+                {
+                    var value = ((JValue)token).Value.ToString();
 
-//                    pars.Add(Convert.ChangeType(value, p.ParameterType));
-//                }
-//            }
+                    pars.Add(files.GetFiles(value));
+                }
+                else if (token.Type == JTokenType.Object)
+                {
+                    var obj = ((JObject)token).ToObject(p.ParameterType);
 
-//            // now execute method inside viewmodel
-//            return ViewModel.Execute(vm, method, pars.ToArray());
-//        }
+                    pars.Add(obj);
+                }
+                else if (token.Type == JTokenType.String && p.ParameterType.IsEnum)
+                {
+                    var value = ((JValue)token).Value.ToString();
 
-//        /// <summary>
-//        /// Create a new object with only diff between original viewmodel and new changed viewmodel
-//        /// </summary>
-//        private JObject GetDiff(JObject original, JObject current)
-//        {
-//            // create a diff object to capture any change from original to current data
-//            var diff = new JObject();
+                    pars.Add(Enum.Parse(p.ParameterType, value));
+                }
+                else
+                {
+                    var value = ((JValue)token).Value;
 
-//            foreach (var item in current)
-//            {
-//                var orig = original[item.Key];
+                    pars.Add(Convert.ChangeType(value, p.ParameterType));
+                }
+            }
 
-//                if (orig == null && item.Value.HasValues == false) continue;
+            // now execute method inside viewmodel
+            return ViewModel.Execute(vm, method, pars.ToArray());
+        }
 
-//                // use a custom compare function
-//                if (JTokenComparer.Instance.Compare(orig, item.Value) != 0)
-//                {
-//                    diff[item.Key] = item.Value;
-//                }
-//            }
+        /// <summary>
+        /// Create a new object with only diff between original viewmodel and new changed viewmodel
+        /// </summary>
+        private JObject GetDiff(JObject original, JObject current)
+        {
+            // create a diff object to capture any change from original to current data
+            var diff = new JObject();
 
-//            return diff;
-//        }
+            foreach (var item in current)
+            {
+                var orig = original[item.Key];
 
-//        #endregion
-//    }
-//}
+                if (orig == null && item.Value.HasValues == false) continue;
+
+                // use a custom compare function
+                if (JTokenComparer.Instance.Compare(orig, item.Value) != 0)
+                {
+                    diff[item.Key] = item.Value;
+                }
+            }
+
+            return diff;
+        }
+
+        #endregion
+    }
+}

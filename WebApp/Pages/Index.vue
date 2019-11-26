@@ -1,5 +1,5 @@
-﻿@page /
-@ascync
+﻿@page / 
+@async0
 
 <div class="item">
     <h1>My Id Counter is {{ id }}</h1>
@@ -12,7 +12,11 @@
         ClickMe-Client
     </button>
     <hr/>
-    <input v-model="Text" />
+    <input v-model="text" />
+    <hr/>
+    {{text}} | Code: {{ code }}
+    <hr/>
+    <button @click="showCode()">ShowCode</button>
 </div>
 
 <style scoped>
@@ -25,8 +29,8 @@
 
 <script>
 
-    this.$on('clickMe:after', function () {
-        console.log('click after')
+    this.$on('clickMe:after', function (r) {
+        console.log('click after - result is ' + r)
     })
 
 </script>

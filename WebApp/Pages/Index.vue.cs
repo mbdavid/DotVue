@@ -5,12 +5,12 @@ namespace WebApp.Pages
 {
     public class Index : ViewModel
     {
-        public string Text { get; set; }
+        public string Text { get; set; } = "Initial value";
 
         public int Id { get; set; } = 15;
 
         [Prop]
-        public string Codigo = "ok";
+        public string Code = "ok";
 
         protected override void OnCreated()
         {
@@ -18,9 +18,20 @@ namespace WebApp.Pages
         }
 
         //[Script("this.$on('{name}:before', function(p) { });")]
-        public void ClickMe(int step)
+        public int ClickMe(int step)
         {
             this.Id += step;
+
+            return this.Id;
         }
+
+        public void ShowCode()
+        {
+            ClientScript.Alert(this.Code);
+        }
+
+        //public void Text_Watch(string newValue, string oldValue)
+        //{
+        //}
     }
 }

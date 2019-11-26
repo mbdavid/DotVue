@@ -21,8 +21,11 @@ namespace DotVue
         public List<string> Mixins { get; set; } = new List<string>();
 
         public JObject JsonData { get; set; } = new JObject();
-        public Dictionary<string, object> Props { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, ViewModelMethod> Methods { get; set; } = new Dictionary<string, ViewModelMethod>();
+
+        public Dictionary<string, object> Props { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, object> RouteParams { get; set; } = new Dictionary<string, object>();
+        public Dictionary<string, object> QueryString { get; set; } = new Dictionary<string, object>();
 
         public bool IsAuthenticated { get; set; }
         public string[] Roles { get; set; } = new string[0];
