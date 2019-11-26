@@ -9,8 +9,6 @@ namespace DotVue
 {
     internal class ViewModelMethod
     {
-        public string[] Pre { get; set; }
-        public string[] Post { get; set; }
         public string[] Parameters { get; set; }
         public MethodInfo Method { get; set; }
         public string Watch { get; set; }

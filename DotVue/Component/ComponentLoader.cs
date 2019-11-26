@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,108 +16,102 @@ namespace DotVue
     internal class ComponentLoader
     {
         private readonly IServiceProvider _service;
-        private readonly Dictionary<string, Func<HtmlTag, string>> _compilers;
+        private readonly string _root;
 
-        public ComponentLoader(IServiceProvider service, Dictionary<string, Func<HtmlTag, string>> compilers)
+        public ComponentLoader(IServiceProvider service)
         {
             _service = service;
-            _compilers = compilers;
+
+            var env = service.GetService<IHostingEnvironment>();
+
+            _root = env.ContentRootPath;
         }
 
-        public ComponentInfo Load(ComponentDiscover discover)
+        public ComponentInfo Load(Assembly assembly, string resourceName)
         {
-            var type = discover.File.ViewModel == null ?
-                typeof(ViewModel) :
-                discover.Assembly.GetType(discover.File.ViewModel, true);
+            // try read file from local disk (for hot reload)
+            var localFile = Path.Combine(_root + @"\..\",
+                assembly.GetName().Name +
+                    resourceName.Substring(assembly.GetName().Name.Length, resourceName.Length - assembly.GetName().Name.Length - 3).Replace(".", "\\")) +
+                ".html";
 
-            var component = new ComponentInfo
+            var content = File.Exists(localFile) ?
+                File.ReadAllText(localFile) :
+                new StreamReader(assembly.GetManifestResourceStream(resourceName)).ReadToEnd();
+
+            var html = new HtmlFile(content);
+            var name = html.GetDirective("name") ?? Path.GetFileNameWithoutExtension(localFile);
+            var component = new ComponentInfo(name);
+
+            var viewModelName = html.GetDirective("viewmodel");
+
+            if (viewModelName == null)
             {
-                Name = discover.Name,
-                Template = this.Compile(discover.File.Template),
-                InheritAttrs = discover.File.InheritAttrs ?? true,
-                Styles = discover.File.Styles.Select(x => this.Compile(x)).ToList(),
-                Scripts = discover.File.ClientScripts.Select(x => this.Compile(x)).ToList(),
-                Includes = discover.File.Includes,
-                IsAutenticated = discover.File.IsAutenticated,
-                Roles = discover.File.Roles.ToArray(),
-                ViewModelType = type,
-                JsonData = this.GetJsonData(type),
-                Props = this.GetProps(type).ToList(),
-                Locals = this.GetLocals(type).ToList(),
-                Computed = this.GetComputed(type).ToDictionary(x => x.Key, x => x.Value),
-                Methods = this.GetMethods(type).ToDictionary(x => x.Method.Name, x => x)
-            };
+                // try guess viewModel based on resource name
+                component.ViewModelType = assembly.GetType(resourceName.Substring(0, resourceName.Length - 5)) ?? typeof(ViewModel);
+            }
+            else
+            {
+                component.ViewModelType = assembly.GetType(viewModelName, true);
+            }
+
+            component.IsAsync = html.GetDirective("async") != null;
+
+            if (html.Directives.TryGetValue("page", out var route))
+            {
+                component.IsPage = true;
+                component.Route = route;
+            }
+
+            component.Template = html.Template.ToString();
+            component.Styles = html.Styles.ToString();
+            component.Scripts = html.Scripts.ToString();
+            component.Mixins = html.Mixins;
+
+            using (var instance = (ViewModel)ActivatorUtilities.CreateInstance(_service, component.ViewModelType))
+            {
+                component.JsonData = this.GetJsonData(instance);
+                component.Props = this.GetProps(component.ViewModelType, instance);
+                component.Methods = this.GetMethods(component.ViewModelType).ToDictionary(x => x.Method.Name, x => x, StringComparer.OrdinalIgnoreCase);
+            }
+
+            component.IsAuthenticated = component.ViewModelType.GetCustomAttribute<AutorizeAttribute>() != null;
+
+            if (component.IsAuthenticated)
+            {
+                component.Roles = component.ViewModelType.GetCustomAttribute<AutorizeAttribute>().Roles;
+            }
 
             return component;
         }
 
         /// <summary>
-        /// Get component name based on resource name
-        /// </summary>
-        public static string GetName(string fullname)
-        {
-            var arr = fullname.Split('.');
-
-            return arr[arr.Length - 2];
-        }
-
-        /// <summary>
-        /// Compile html/css/js based on lang="" attribute
-        /// </summary>
-        private string Compile(HtmlTag tag)
-        {
-            if (tag.Attributes.TryGetValue("lang", out var lang) && _compilers.TryGetValue(lang, out var func))
-            {
-                return func(tag);
-            }
-            else
-            {
-                return tag.InnerHtml.ToString();
-            }
-        }
-
-        /// <summary>
         /// Get default ViewModel as json data
         /// </summary>
-        private string GetJsonData(Type type)
+        private JObject GetJsonData(ViewModel instance)
         {
-            using (var vm = (ViewModel)ActivatorUtilities.CreateInstance(_service, type))
+            var jsonSettings = new JsonSerializerSettings
             {
-                return JsonConvert.SerializeObject(vm, Config.JsonSettings);
-            }
+                NullValueHandling = NullValueHandling.Include,
+                ObjectCreationHandling = ObjectCreationHandling.Replace,
+                ContractResolver = new PropertyOnlyContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                }
+            };
+
+            return JObject.Parse(JsonConvert.SerializeObject(instance, jsonSettings));
         }
 
         /// <summary>
         /// Get all properties defined as [Prop] attribute
         /// </summary>
-        private IEnumerable<string> GetProps(Type type)
+        private Dictionary<string, object> GetProps(Type type, ViewModel instance)
         {
             return type
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                .GetFields(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.GetCustomAttribute<PropAttribute>() != null)
-                .Select(x => x.Name.ToCamelCase());
-        }
-
-        /// <summary>
-        /// Get all properties defined as [Local] attribute
-        /// </summary>
-        private IEnumerable<string> GetLocals(Type type)
-        {
-            return type
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Where(x => x.GetCustomAttribute<LocalAttribute>() != null)
-                .Select(x => x.Name);
-        }
-
-        /// <summary>
-        /// Get all properties defined as [Computed] attribute (ComputedName, JsCode)
-        /// </summary>
-        private IEnumerable<KeyValuePair<string, string>> GetComputed(Type type)
-        {
-            return type
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                .Select(x => new KeyValuePair<string, string>(x.Name, x.GetCustomAttribute<ComputedAttribute>(true)?.Code))
-                .Where(x => x.Value != null);
+                .ToDictionary(x => x.Name, x => x.GetValue(instance), StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -151,8 +147,6 @@ namespace DotVue
             var scripts = m.GetCustomAttributes<ScriptAttribute>(true).ToArray();
             var autorize = m.GetCustomAttribute<AutorizeAttribute>(true);
 
-            var pre = scripts.Where(x => !string.IsNullOrWhiteSpace(x.Pre)).Select(x => x.Pre).ToArray();
-            var post = scripts.Where(x => !string.IsNullOrWhiteSpace(x.Post)).Select(x => x.Post).ToArray();
             var parameters = m.GetParameters().Select(x => x.Name).ToArray();
             var roles = autorize?.Roles ?? new string[0];
             var watch = m.Name.EndsWith("_Watch", StringComparison.InvariantCultureIgnoreCase) || m.GetCustomAttribute<WatchAttribute>() != null ?
@@ -162,8 +156,6 @@ namespace DotVue
             return new ViewModelMethod
             {
                 Method = m,
-                Pre = pre,
-                Post = post,
                 Parameters = parameters,
                 Watch = watch,
                 IsAuthenticated = autorize != null,

@@ -10,7 +10,7 @@ namespace DotVue
     /// <summary>
     /// Define C# class property as an Vue props - do not update this value in server-side (it´s updated by parent component only)
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Field)]
     public class PropAttribute : Attribute
     {
     }

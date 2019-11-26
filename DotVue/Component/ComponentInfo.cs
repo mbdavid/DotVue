@@ -6,38 +6,32 @@ namespace DotVue
 {
     internal class ComponentInfo
     {
-        public string Name { get; set; }
+        public string Name { get; }
+
+        public bool IsPage { get; set; }
+        public string Route { get; set; }
+        public bool IsAsync { get; set; }
+        public bool InheritAttrs { get; set; } = true;
 
         public Type ViewModelType { get; set; } = typeof(ViewModel);
 
-        public bool IsAutenticated { get; set; } = false;
-        public string[] Roles { get; set; } = new string[0];
+        public string Template { get; set; }
+        public string Styles { get; set; }
+        public string Scripts { get; set; }
+        public List<string> Mixins { get; set; } = new List<string>();
 
-        public string Template { get; set; } = "";
-        public bool InheritAttrs { get; set; } = true;
-        public List<string> Styles { get; set; } = new List<string>();
-        public List<string> Scripts { get; set; } = new List<string>();
-        public List<string> Includes { get; set; } = new List<string>();
-
-        public string JsonData { get; set; } = "{}";
-        public List<string> Props { get; set; } = new List<string>();
+        public JObject JsonData { get; set; } = new JObject();
+        public Dictionary<string, object> Props { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, ViewModelMethod> Methods { get; set; } = new Dictionary<string, ViewModelMethod>();
-        public Dictionary<string, string> Computed { get; set; } = new Dictionary<string, string>();
-        public List<string> Locals { get; set; } = new List<string>();
+
+        public bool IsAuthenticated { get; set; }
+        public string[] Roles { get; set; } = new string[0];
 
         public bool CreatedHook => this.Methods.ContainsKey("OnCreated");
 
-        public static ComponentInfo Error(string name, Exception ex)
+        public ComponentInfo(string name)
         {
-            return new ComponentInfo
-            {
-                Name = name,
-                Template = 
-                    $"<div style=\"background-color:#ffc;padding:15px;font-family:Arial;font-size:12px;\">" + 
-                    $"<div style='color: #800000; font-size: 22px; font-style: italic;'>[{name}.vue] [{ex.GetType().Name}] {ex.Message}</div>" + 
-                    $"<pre>{ex.StackTrace}</pre>" +
-                    "</div>"
-            };
+            this.Name = name;
         }
     }
 }

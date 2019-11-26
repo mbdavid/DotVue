@@ -15,26 +15,13 @@ namespace DotVue
 {
     public static class DotVueMiddlewareExtensions
     {
-        public static IApplicationBuilder UseDotVue(this IApplicationBuilder builder, Action<Config> setup)
+        public static IApplicationBuilder UseDotVue(this IApplicationBuilder builder, params Assembly[] assemblies)
         {
             var config = new Config();
-
-            setup(config);
 
             return builder.MapWhen(c => c.Request.Path.Value.EndsWith(".vue"), app =>
             {
                 app.UseMiddleware<Handler>(config);
-            });
-        }
-
-        public static IApplicationBuilder UseDotVue(this IApplicationBuilder builder, params Assembly[] assemblies)
-        {
-            return UseDotVue(builder, c =>
-            {
-                foreach(var a in assemblies)
-                {
-                    c.AddAssembly(a);
-                }
             });
         }
     }

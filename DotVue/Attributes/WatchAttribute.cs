@@ -13,7 +13,7 @@ namespace DotVue
     [AttributeUsage(AttributeTargets.Method)]
     public class WatchAttribute : Attribute
     {
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Define variable name to subscribe for changes on client side

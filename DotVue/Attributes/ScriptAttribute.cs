@@ -8,23 +8,16 @@ using Newtonsoft.Json.Linq;
 namespace DotVue
 {
     /// <summary>
-    /// Execute script pre/post $update be called
+    /// Inject script in "created" function
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = true)]
     public class ScriptAttribute : Attribute
     {
-        public string Pre { get; set; }
-        public string Post { get; set; }
+        public virtual string Code { get; }
 
-        public ScriptAttribute(string pre)
+        public ScriptAttribute(string code)
         {
-            this.Pre = pre;
-        }
-
-        public ScriptAttribute(string pre, string post)
-        {
-            this.Pre = pre;
-            this.Post = post;
+            this.Code = code;
         }
     }
 }

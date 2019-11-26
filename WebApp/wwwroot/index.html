@@ -5,63 +5,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=9;IE=10;IE=Edge,chrome=1" />
-    <link rel="shortcut icon" type="image/png" href="https://www.google.com/s2/favicons?domain=www.google.com" />
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.css" rel="stylesheet" />
-    <link href="site.css" rel="stylesheet" />
-    <style>
-    </style>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 </head>
 <body>
 
-    <div id="app" v-cloak>
+    <h1>DotVue Examples (with .vue and .vue.cs files)</h1>
+    <hr/>
 
-        <h1>DotVue Examples (with .vue and .vue.cs files)</h1>
-
-        <div class="nav">
-            <a v-for="p in pages" :class="{ sel: current == p }" :href="'#/'+ p">{{ p }}</a>
-        </div>
-
-        <keep-alive>
-            <component ref="page" :is="current" :query="query"></component>
-        </keep-alive>
-
-        <div class="source">
-            <a :href="current + '.vue'" target="_blank">Show Vue compoenent source generated</a>
-        </div>
-
+    <div id="app">
+        Loading...
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
-    <script src="https://rawgit.com/mbdavid/routerjs/master/router.js" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.2.6/vue.js"></script>
-    <script src="bootstrap.vue"></script>
-    <script>
-
-        new Vue({
-            el: '#app',
-            data: {
-                pages: [
-                    'Page1', 'QueryString', 'TodoServer', 'TodoClient', 'NProgress', 'Upload',
-                    'DataType', 'LayoutContent', 'FormEmit', 'Controls', 'Error',
-                    'Local', 'DI', 'Includes', 'MethodResult', 'Encoding', 'DotLess', 'Login'
-                ],
-                current: 'Page1',
-                query: {}
-            },
-            created: function () {
-                var vm = this;
-
-                router(/.*/, function (ctx, next) {
-                    vm.current = ctx.segments[0] || 'Page1';
-                    vm.query = ctx.query;
-                });
-
-                router();
-            }
-        });
-
-    </script>
+    <script src="bootstrap.vue?id=app"></script>
 
 </body>
 </html>
