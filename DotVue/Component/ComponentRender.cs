@@ -193,7 +193,6 @@ namespace DotVue
                 _writer.Append($"style.innerText = '{s.EncodeJavascript()}';\n");
                 _writer.Append($"document.head.appendChild(style);\n");
             }
-
         }
     }
 }

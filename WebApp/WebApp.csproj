@@ -1,26 +1,35 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="wwwroot\dot-vue.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="Pages\DotLess.vue" />
+    <None Remove="Pages\DataType.vue" />
+    <None Remove="Pages\DI.vue" />
     <None Remove="Pages\Encoding.vue" />
-    <None Remove="Pages\Includes.vue" />
+    <None Remove="Pages\Error.vue" />
+    <None Remove="Pages\FormEmit.vue" />
+    <None Remove="Pages\FormInner.vue" />
     <None Remove="Pages\Index.vue" />
-    <None Remove="Pages\Login.vue" />
-    <None Remove="Pages\Page1.vue" />
+    <None Remove="Pages\MethodResult.vue" />
+    <None Remove="Pages\QueryString.vue" />
+    <None Remove="Pages\TodoClient.vue" />
+    <None Remove="Pages\Upload.vue" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Pages\Page1.vue" />
+    <EmbeddedResource Include="Pages\DataType.vue" />
+    <EmbeddedResource Include="Pages\DI.vue" />
+    <EmbeddedResource Include="Pages\Encoding.vue" />
+    <EmbeddedResource Include="Pages\Error.vue" />
+    <EmbeddedResource Include="Pages\FormEmit.vue" />
+    <EmbeddedResource Include="Pages\FormInner.vue" />
     <EmbeddedResource Include="Pages\Index.vue" />
-    <EmbeddedResource Include="wwwroot\dot-vue.js" />
+    <EmbeddedResource Include="Pages\MethodResult.vue" />
+    <EmbeddedResource Include="Pages\QueryString.vue" />
+    <EmbeddedResource Include="Pages\TodoClient.vue" />
+    <EmbeddedResource Include="Pages\Upload.vue" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +39,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DotVue\DotVue.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Classes\" />
   </ItemGroup>
 
 </Project>

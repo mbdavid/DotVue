@@ -102,7 +102,7 @@ namespace DotVue
 
             // check for permissions
             if (met.IsAuthenticated && _user.Identity.IsAuthenticated == false) throw new HttpException(401);
-            if (met.Roles.Length > 0 && met.Roles.Any(x => _user.IsInRole(x)) == false) throw new HttpException(403, $"Forbidden. This method requires one of this roles: `{string.Join("`, `", met.Roles)}`");
+            if (met.Roles.Length > 0 && met.Roles.Any(x => _user.IsInRole(x)) == false) throw new HttpException(403, $"Forbidden. This method requires all this roles: `{string.Join("`, `", met.Roles)}`");
 
             // convert each parameter as declared method in type
             foreach (var p in method.GetParameters())

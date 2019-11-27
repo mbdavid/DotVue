@@ -1,5 +1,4 @@
 ﻿@page / 
-@async0
 
 <div class="item">
     <h1>My Id Counter is {{ id }}</h1>
@@ -17,6 +16,7 @@
     {{text}} | Code: {{ code }}
     <hr/>
     <button @click="showCode()">ShowCode (with confirm)</button>
+    <hr/>
 </div>
 
 <style scoped>

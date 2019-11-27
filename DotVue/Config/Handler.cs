@@ -43,11 +43,17 @@ namespace DotVue
             if (isBootstrap)
             {
                 response.ContentType = "text/javascript";
-                
+
                 var writer = new StringBuilder();
                 var render = new ComponentRender(writer);
 
                 writer.Append("(function() {\n");
+
+                // inject dot-vue.js
+                writer.Append(new StreamReader(typeof(Handler)
+                    .Assembly
+                    .GetManifestResourceStream("DotVue.Scripts.dot-vue.js"))
+                    .ReadToEnd());
 
                 writer.Append("//\n// Create Vue Components\n//\n");
 
@@ -96,7 +102,7 @@ namespace DotVue
                 var render = new ComponentRender(writer);
                 
                 render.RenderComponent(component);
-                
+
                 await response.WriteAsync(writer.ToString());
             }
             else if (isPost)
@@ -110,6 +116,10 @@ namespace DotVue
                 var parameters = JArray.Parse(request.Form["params"]).ToArray();
 
                 var component = _config.GetComponent(name);
+
+                // check for autentication at viewModel level
+                if (component.IsAuthenticated && context.User.Identity.IsAuthenticated == false) throw new HttpException(401);
+                if (component.Roles.Length > 0 && component.Roles.Any(x => context.User.IsInRole(x)) == false) throw new HttpException(403, $"Forbidden. This view model requires all this roles: `{string.Join("`, `", component.Roles)}`");
 
                 var update = new ComponentUpdate(component, user);
 

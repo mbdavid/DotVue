@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 
 namespace DotVue
@@ -34,7 +35,7 @@ namespace DotVue
 
         public ComponentInfo(string name)
         {
-            this.Name = name;
+            this.Name = Regex.Replace(Regex.Replace(name, @"^\d*", ""), @"\s", "_");
         }
     }
 }

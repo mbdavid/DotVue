@@ -15,7 +15,7 @@ namespace DotVue
     public class Config
     {
         private readonly Assembly[] _assemblies;
-        private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>();
+        private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>(StringComparer.OrdinalIgnoreCase);
 
         public Config(Assembly[] assemblies)
         {
