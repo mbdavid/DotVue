@@ -133,8 +133,6 @@ const DotVue = {
             // create form with all data
             var form = new FormData();
 
-            console.log('request.vm.$data', JSON.stringify(request.vm.$data || {}));
-
             form.append('method', request.name);
             form.append('props', JSON.stringify(request.vm.$props || {}));
             form.append('data', JSON.stringify(request.vm.$data || {}));
@@ -161,6 +159,12 @@ const DotVue = {
 
             xhr.open('POST', request.vm.$options.name + '.vue', true);
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+            // handle before submit viewmodel
+            if (typeof DotVue.onrequest === 'function') {
+                dotv.onrequest(xhr, form);
+            }
+
             xhr.send(form);
         }
 

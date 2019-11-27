@@ -30,6 +30,7 @@
 <script>
 
     this.$on('showCode:before', function (r) {
+        r.wait();
         if (confirm('Submit?')) {
             r.resolve();
         }
