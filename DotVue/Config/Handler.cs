@@ -95,6 +95,8 @@ namespace DotVue
             else if (isLoad)
             {
                 response.ContentType = "text/javascript";
+
+                _config.Discover(context.RequestServices);
                 
                 // render component script
                 var component = _config.GetComponent(name);

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WebApp.Components
+namespace WebApp.Pages
 {
     public class TodoClient : ViewModel
     {

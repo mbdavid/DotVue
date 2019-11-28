@@ -13,14 +13,14 @@
         <li v-for="(item, i) in items">
             <input type="checkbox" v-model="item.done" />
             <span :style="{ 'text-decoration': item.done ? 'line-through' : 'none' }" @click="item.done = !item.done">
-                {{ item.Text }}
+                {{ item.text }}
             </span>
             <button v-on:click.prevent="Remove(i)" :disabled="item.done" type="submit">X</button>
         </li>
     </ul>
     <hr />
     <button type="button" @click="save()">Save on Server</button>
-    <pre>{{$data|json}}</pre>
+    <pre>{{$data}}</pre>
 </div>
 
 <script>

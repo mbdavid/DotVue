@@ -44,10 +44,12 @@ namespace DotVue
                     }
                     catch (Exception ex)
                     {
-                        //_components["ErrView"] = new ComponentInfo("ErrView")
-                        //{
-                        //    GlobalScript = $"document.body.innerHTML = `<h1 style='color:red'>{ex.Message}<hr><h3 style='color: brown; font-style: italic'>{file}</h3><hr><pre>{ex.StackTrace.Replace("`", "'")}</pre>`;"
-                        //};
+                        var name = Path.GetFileNameWithoutExtension(file);
+
+                        _components[name] = new ComponentInfo(name)
+                        {
+                            Template = ex.Message
+                        };
 
                         break;
                     }

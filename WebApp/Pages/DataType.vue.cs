@@ -10,7 +10,7 @@ namespace WebApp.Pages
         public DateTime DateValue { get; set; } = DateTime.Now;
         public bool BoolValue { get; set; } = false;
         public decimal DecimalValue { get; set; } = 1.99m;
-        public InnerClass Inner = new InnerClass();
+        public InnerClass Inner { get; set; } = new InnerClass();
 
         public void Post()
         {

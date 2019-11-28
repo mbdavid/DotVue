@@ -12,14 +12,13 @@
 
     <div id="app">
         <ul class="menu">
-            <li><b>Examples:</b></li>
-            <li v-for="p in pages">
-                <router-link :to="p">{{p}}</router-link>
+            <li><b>Examples</b></li>
+            <li v-for="page in pages">
+                <router-link :to="page.path">{{page.component.name}}</router-link>
             </li>
         </ul>
-        <router-view></router-view>
-        <hr />
-        <a target="_blank" :href="$route.path + '.vue'">Show generated vue component</a>
+        <router-view :key="$route.fullPath"></router-view>
+        <a target="_blank" class="source" :href="pages.find(x => x.path == $route.path).component.name + '.vue'">Show generated vue component</a>
     </div>
 
     <script src="bootstrap.vue"></script>
@@ -29,7 +28,7 @@
         new Vue({
             el: '#app',
             data: {
-                pages: ['/', '/data-type', '/di', '/encoding', '/route/1', '/todo-client', '/upload']
+                pages: DotVue.routes
             },
             router: new VueRouter({ routes: DotVue.routes })
         });
@@ -60,6 +59,13 @@
         .menu .router-link-exact-active {
             font-weight: bold;
             color: red;
+        }
+        .source {
+            font-family: Arial;
+            font-size: 11px;
+            color: gray;
+            margin-top: 15px;
+            display: inline-block;
         }
 
 

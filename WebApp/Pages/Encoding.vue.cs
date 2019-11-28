@@ -3,7 +3,7 @@ using System;
 
 namespace WebApp.Pages
 {
-    public class EncodingVM : ViewModel
+    public class Encoding : ViewModel
     {
         public string Text { get; set; }
 
