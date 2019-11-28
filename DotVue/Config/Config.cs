@@ -16,6 +16,7 @@ namespace DotVue
     {
         private readonly Assembly[] _assemblies;
         private readonly Dictionary<string, ComponentInfo> _components = new Dictionary<string, ComponentInfo>(StringComparer.OrdinalIgnoreCase);
+        private readonly StringBuilder _globalScripts = new StringBuilder();
 
         public Config(Assembly[] assemblies)
         {
@@ -44,12 +45,7 @@ namespace DotVue
                     }
                     catch (Exception ex)
                     {
-                        var name = Path.GetFileNameWithoutExtension(file);
-
-                        _components[name] = new ComponentInfo(name)
-                        {
-                            Template = ex.Message
-                        };
+                        _globalScripts.Append($"document.body.innerHTML = `<h1>{ex.Message}</h1><h3>{file}</h3><pre>{ex.StackTrace}</pre>`");
 
                         break;
                     }
@@ -79,5 +75,10 @@ namespace DotVue
         {
             return _components.Values;
         }
+
+        /// <summary>
+        /// Return global script injection
+        /// </summary>
+        internal StringBuilder GlobalScripts => _globalScripts;
     }
 }

@@ -44,10 +44,15 @@ namespace DotVue
             {
                 response.ContentType = "text/javascript";
 
+                _config.Discover(context.RequestServices);
+
                 var writer = new StringBuilder();
                 var render = new ComponentRender(writer);
 
                 writer.Append("(function() {\n");
+
+                // inject global script
+                writer.Append(_config.GlobalScripts);
 
                 // inject dot-vue.js
                 writer.Append(new StreamReader(typeof(Handler)
@@ -56,9 +61,6 @@ namespace DotVue
                     .ReadToEnd());
 
                 writer.Append("//\n// Create Vue Components\n//\n");
-
-                // discover all components
-                _config.Discover(context.RequestServices);
 
                 foreach (var component in _config.GetComponents().Where(x => !string.IsNullOrWhiteSpace(x.Template)))
                 {

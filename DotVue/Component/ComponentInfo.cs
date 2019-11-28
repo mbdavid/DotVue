@@ -35,7 +35,7 @@ namespace DotVue
 
         public ComponentInfo(string name)
         {
-            this.Name = Regex.Replace(Regex.Replace(name, @"^\d*", ""), @"\s", "_");
+            this.Name = Regex.Replace(Regex.Replace(name, @"^\d*", ""), @"[\s-$]", "_");
         }
     }
 }
