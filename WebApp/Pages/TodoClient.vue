@@ -1,4 +1,5 @@
-﻿
+﻿@page /todo-client
+
 <div>
     <h3>Todo List - Client Only - Server only on Save()</h3>
     <hr />
@@ -19,6 +20,7 @@
     </ul>
     <hr />
     <button type="button" @click="save()">Save on Server</button>
+    <pre>{{$data|json}}</pre>
 </div>
 
 <script>

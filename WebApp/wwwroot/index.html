@@ -7,21 +7,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=9;IE=10;IE=Edge,chrome=1" />
     <script src="https://unpkg.com/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
-    <style>
-        .router-link-exact-active {
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
 
     <div id="app">
-        <b>DotVue: </b>
-        <router-link to="/">Index</router-link> |
-        <router-link to="/page1/123">Page1</router-link> |
-        <router-link to="/page1/456?p=1">Page1?p=1</router-link>
-        <hr />
+        <ul class="menu">
+            <li><b>Examples:</b></li>
+            <li v-for="p in pages">
+                <router-link :to="p">{{p}}</router-link>
+            </li>
+        </ul>
         <router-view></router-view>
+        <hr />
+        <a target="_blank" :href="$route.path + '.vue'">Show generated vue component</a>
     </div>
 
     <script src="bootstrap.vue"></script>
@@ -30,12 +28,42 @@
 
         new Vue({
             el: '#app',
+            data: {
+                pages: ['/', '/data-type', '/di', '/encoding', '/route/1', '/todo-client', '/upload']
+            },
             router: new VueRouter({ routes: DotVue.routes })
         });
 
-
     </script>
 
+    <style>
+        .menu {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            border: 1px solid silver;
+        }
+        .menu li {
+            display: inline-block;
+            padding: 5px 8px;
+        }
+        .menu li + li {
+            border-left: 1px solid silver;
+        }
+        .menu li a {
+            text-decoration: none;
+            color: blue;
+        }
+        .menu li a:hover {
+            text-decoration: underline;
+        }
+        .menu .router-link-exact-active {
+            font-weight: bold;
+            color: red;
+        }
+
+
+    </style>
 
 </body>
 </html>

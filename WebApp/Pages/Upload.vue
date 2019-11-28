@@ -1,4 +1,6 @@
-﻿<div>
+﻿@page /upload
+
+<div>
     <h3>Simple Upload file</h3>
 
     <hr />
