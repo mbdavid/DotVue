@@ -50,7 +50,7 @@ namespace DotVue
             return null;
         }
 
-        public HtmlFile(string content)
+        public HtmlFile(string content, StringBuilder globalScripts)
         {
             var s = new StringScanner(content, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
@@ -87,6 +87,10 @@ namespace DotVue
                 else if (s.Match(@"<script\s+mixin>([\s\S]*?)</script>"))
                 {
                     this.Mixins.Add(s.Scan(@"<script\s+mixin>([\s\S]*?)</script>", 1));
+                }
+                else if (s.Match(@"<script\s+global>([\s\S]*?)</script>"))
+                {
+                    globalScripts.Append(s.Scan(@"<script\s+global>([\s\S]*?)</script>", 1));
                 }
                 else if (s.Match(@"<template>([\s\S]*?)</template>"))
                 {

@@ -39,13 +39,13 @@ namespace DotVue
                 {
                     try
                     {
-                        var component = loader.Load(assembly, file);
+                        var component = loader.Load(assembly, file, _globalScripts);
 
                         _components[component.Name] = component;
                     }
                     catch (Exception ex)
                     {
-                        _globalScripts.Append($"document.body.innerHTML = `<h1>{ex.Message}</h1><h3>{file}</h3><pre>{ex.StackTrace}</pre>`");
+                        _globalScripts.Append($"document.body.innerHTML = `<h1 style='color:red'>{ex.Message}</h1><h3>{file}</h3><pre>{ex.StackTrace}</pre>`");
 
                         break;
                     }

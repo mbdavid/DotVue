@@ -1,6 +1,6 @@
 ﻿@page / 
 
-<div class="item">
+<div>
     <h1>My Id Counter is {{ id }}</h1>
     <button type="button"
             @click="clickMe(5)">
@@ -18,8 +18,11 @@
     <button @click="showCode()">ShowCode (with confirm)</button>
     <hr/>
 </div>
-
 <style scoped>
+
+    & {
+        border: 3px solid blue;
+    }
 
     button {
         color:red;

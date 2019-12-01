@@ -184,7 +184,6 @@ namespace DotVue
             {
                 var s = dotless.Core.LessWeb.Parse(styles.ToString(), new dotless.Core.configuration.DotlessConfiguration
                 {
-                    Web = true,
                     MinifyOutput = true,
                     CacheEnabled = false
                 });
