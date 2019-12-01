@@ -13,7 +13,7 @@
     <hr/>
     <input v-model="text" />
     <hr/>
-    {{text}} | Code: {{ code }}
+    {{text | upper }} | Code: {{ code }}
     <hr/>
     <button @click="showCode()">ShowCode (with confirm)</button>
     <hr/>
@@ -21,7 +21,8 @@
 <style scoped>
 
     & {
-        border: 3px solid blue;
+        background-color: #f5f5f5;
+        padding: 15px;
     }
 
     button {
@@ -40,6 +41,15 @@
         else {
             r.reject();
         }
+    })
+
+</script>
+<script global>
+
+    // global script block will be added as script before load components
+
+    Vue.filter('upper', function (value) {
+        return value.toString().toUpperCase();
     })
 
 </script>

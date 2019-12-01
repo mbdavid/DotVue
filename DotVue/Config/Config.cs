@@ -45,7 +45,7 @@ namespace DotVue
                     }
                     catch (Exception ex)
                     {
-                        _globalScripts.Append($"document.body.innerHTML = `<h1 style='color:red'>{ex.Message}</h1><h3>{file}</h3><pre>{ex.StackTrace}</pre>`");
+                        _globalScripts.Append($"document.body.innerHTML = '<h1 style=\"color:red\">{ex.Message.EncodeJavascript()}</h1><h3>{file}</h3><pre>{ex.StackTrace.EncodeJavascript()}</pre>`");
 
                         break;
                     }

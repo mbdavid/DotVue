@@ -182,15 +182,22 @@ namespace DotVue
 
             if (styles.Length > 0)
             {
-                var s = dotless.Core.LessWeb.Parse(styles.ToString(), new dotless.Core.configuration.DotlessConfiguration
+                try
                 {
-                    MinifyOutput = true,
-                    CacheEnabled = false
-                });
+                    var s = dotless.Core.LessWeb.Parse(styles.ToString(), new dotless.Core.configuration.DotlessConfiguration
+                    {
+                        MinifyOutput = true,
+                        CacheEnabled = false
+                    });
 
-                _writer.Append($"var style = document.createElement('style');\n");
-                _writer.Append($"style.innerText = '{s.EncodeJavascript()}';\n");
-                _writer.Append($"document.head.appendChild(style);\n");
+                    _writer.Append($"var style = document.createElement('style');\n");
+                    _writer.Append($"style.innerText = '{s.EncodeJavascript()}';\n");
+                    _writer.Append($"document.head.appendChild(style);\n");
+                }
+                catch(Exception ex)
+                {
+                    _writer.Append($"document.body.innerHTML = '<h1 style=\"color:red\">LESS compiler error:{ex.Message.EncodeJavascript()}</h1><pre>{ex.StackTrace.EncodeJavascript()}</pre>'");
+                }
             }
         }
     }
