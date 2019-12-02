@@ -30,6 +30,8 @@ namespace DotVue
         {
             var loader = new ComponentLoader(service);
 
+            _globalScripts.Clear();
+
             // reading all html files inside assemblies
             foreach (var assembly in _assemblies)
             {
