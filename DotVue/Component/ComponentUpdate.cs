@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -32,7 +33,7 @@ namespace DotVue
 
         #region Update Models
 
-        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, TextWriter writer)
+        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, IServiceProvider serviceProvider, TextWriter writer)
         {
             var jsonSerializer = new JsonSerializer
             {
@@ -59,7 +60,7 @@ namespace DotVue
                 ViewModel.SetData(vm, original);
 
                 // if has method, call in existing vms
-                var result = this.ExecuteMethod(method, vm, parameters, files);
+                var result = this.ExecuteMethod(method, vm, parameters, files, serviceProvider);
 
                 // now, get viewmodel changes on data
                 var current = JObject.FromObject(vm, jsonSerializer);
@@ -93,7 +94,7 @@ namespace DotVue
         /// <summary>
         /// Find a method in all componenets and execute if found
         /// </summary>
-        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files)
+        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files, IServiceProvider serviceProvider)
         {
             var met = _component.Methods[name];
             var method = met.Method;
@@ -107,6 +108,16 @@ namespace DotVue
             // convert each parameter as declared method in type
             foreach (var p in method.GetParameters())
             {
+                // if has no passed parameter, try create instance based on DI
+                if (index >= parameters.Length)
+                {
+                    var value = serviceProvider.GetService(p.ParameterType);
+
+                    pars.Add(value);
+
+                    continue;
+                }
+
                 var token = parameters[index++];
 
                 if (p.ParameterType == typeof(IFormFile))
