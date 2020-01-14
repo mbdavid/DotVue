@@ -211,11 +211,11 @@ namespace DotVue
 
                 if (value != null)
                 {
-                    cookies.Append(field.Key, value.ToString());
+                    cookies.Append(field.Key.ToCamelCase(), value.ToString());
                 }
                 else
                 {
-                    cookies.Delete(field.Key);
+                    cookies.Delete(field.Key.ToCamelCase());
                 }
             }
         }
