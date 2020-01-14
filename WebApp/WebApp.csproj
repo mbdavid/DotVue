@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Pages\Cookie.vue" />
     <None Remove="Pages\DataType.vue" />
     <None Remove="Pages\DI.vue" />
     <None Remove="Pages\Encoding.vue" />
@@ -18,6 +19,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Pages\DataType.vue" />
     <EmbeddedResource Include="Pages\DI.vue" />
+    <EmbeddedResource Include="Pages\Cookie.vue" />
     <EmbeddedResource Include="Pages\Encoding.vue" />
     <EmbeddedResource Include="Pages\Error.vue" />
     <EmbeddedResource Include="Pages\Index.vue" />

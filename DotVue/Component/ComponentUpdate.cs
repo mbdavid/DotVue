@@ -32,7 +32,7 @@ namespace DotVue
 
         #region Update Models
 
-        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, TextWriter writer)
+        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, HttpContext context, TextWriter writer)
         {
             var jsonSerializer = new JsonSerializer
             {
@@ -50,6 +50,9 @@ namespace DotVue
             // populate my object with client $props
             JsonConvert.PopulateObject(props, vm);
 
+            // populate all cookies attributes
+            this.ReadCookies(vm, context.Request.Cookies);
+
             // parse $data as original value (before any update)
             var original = JObject.FromObject(vm, jsonSerializer);
 
@@ -59,7 +62,7 @@ namespace DotVue
                 ViewModel.SetData(vm, original);
 
                 // if has method, call in existing vms
-                var result = this.ExecuteMethod(method, vm, parameters, files);
+                var result = this.ExecuteMethod(method, vm, parameters, context);
 
                 // now, get viewmodel changes on data
                 var current = JObject.FromObject(vm, jsonSerializer);
@@ -69,6 +72,9 @@ namespace DotVue
 
                 // detect changed from original to current data and send back to browser
                 var diff = this.GetDiff(original, current);
+
+                // write cookies into http response
+                this.WriteCookies(vm, context.Response.Cookies);
 
                 // write changes to writer
                 using (var w = new JsonTextWriter(writer))
@@ -93,7 +99,7 @@ namespace DotVue
         /// <summary>
         /// Find a method in all componenets and execute if found
         /// </summary>
-        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files)
+        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, HttpContext context)
         {
             var met = _component.Methods[name];
             var method = met.Method;
@@ -113,13 +119,13 @@ namespace DotVue
                 {
                     var value = ((JValue)token).Value.ToString();
 
-                    pars.Add(files.GetFile(value));
+                    pars.Add(context.Request.Form.Files.GetFile(value));
                 }
                 else if (p.ParameterType == typeof(IList<IFormFile>))
                 {
                     var value = ((JValue)token).Value.ToString();
 
-                    pars.Add(files.GetFiles(value));
+                    pars.Add(context.Request.Form.Files.GetFiles(value));
                 }
                 else if (token.Type == JTokenType.Object)
                 {
@@ -167,6 +173,40 @@ namespace DotVue
             }
 
             return diff;
+        }
+
+        private void ReadCookies(ViewModel vm, IRequestCookieCollection cookies)
+        {
+            var type = vm.GetType();
+
+            foreach (var field in _component.Cookies)
+            {
+                var value = cookies[field.Key];
+
+                if (value != null)
+                {
+                    field.Value.SetValue(vm, Convert.ChangeType(value, field.Value.FieldType));
+                }
+            }
+        }
+
+        private void WriteCookies(ViewModel vm, IResponseCookies cookies)
+        {
+            var type = vm.GetType();
+
+            foreach (var field in _component.Cookies)
+            {
+                var value = field.Value.GetValue(vm);
+
+                if (value != null)
+                {
+                    cookies.Append(field.Key, value.ToString());
+                }
+                else
+                {
+                    cookies.Delete(field.Key);
+                }
+            }
         }
 
         #endregion

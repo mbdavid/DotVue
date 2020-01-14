@@ -131,7 +131,7 @@ namespace DotVue
 
                 var vm = (ViewModel)ActivatorUtilities.CreateInstance(context.RequestServices, component.ViewModelType);
 
-                await update.UpdateModel(vm, data, props, method, parameters, request.Form.Files, writer);
+                await update.UpdateModel(vm, data, props, method, parameters, context, writer);
             }
         }
     }
