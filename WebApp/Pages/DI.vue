@@ -63,5 +63,6 @@
 
     <hr/>
     <button @click="onCreated()">New Request</button>
+    <button @click="methodCall(15)">DI in method</button>
 
 </div>

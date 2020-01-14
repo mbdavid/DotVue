@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -62,7 +63,7 @@ namespace DotVue
                 ViewModel.SetData(vm, original);
 
                 // if has method, call in existing vms
-                var result = this.ExecuteMethod(method, vm, parameters, context);
+                var result = this.ExecuteMethod(method, vm, parameters, context.Request.Form.Files, context.RequestServices);
 
                 // now, get viewmodel changes on data
                 var current = JObject.FromObject(vm, jsonSerializer);
@@ -99,7 +100,7 @@ namespace DotVue
         /// <summary>
         /// Find a method in all componenets and execute if found
         /// </summary>
-        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, HttpContext context)
+        private object ExecuteMethod(string name, ViewModel vm, JToken[] parameters, IFormFileCollection files, IServiceProvider serviceProvider)
         {
             var met = _component.Methods[name];
             var method = met.Method;
@@ -113,19 +114,29 @@ namespace DotVue
             // convert each parameter as declared method in type
             foreach (var p in method.GetParameters())
             {
+                // if has no passed parameter, try create instance based on DI
+                if (index >= parameters.Length)
+                {
+                    var value = serviceProvider.GetService(p.ParameterType);
+
+                    pars.Add(value);
+
+                    continue;
+                }
+
                 var token = parameters[index++];
 
                 if (p.ParameterType == typeof(IFormFile))
                 {
                     var value = ((JValue)token).Value.ToString();
 
-                    pars.Add(context.Request.Form.Files.GetFile(value));
+                    pars.Add(files.GetFile(value));
                 }
                 else if (p.ParameterType == typeof(IList<IFormFile>))
                 {
                     var value = ((JValue)token).Value.ToString();
 
-                    pars.Add(context.Request.Form.Files.GetFiles(value));
+                    pars.Add(files.GetFiles(value));
                 }
                 else if (token.Type == JTokenType.Object)
                 {

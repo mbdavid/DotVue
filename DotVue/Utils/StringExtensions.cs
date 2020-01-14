@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
@@ -26,6 +27,11 @@ namespace DotVue
 
             return str[0].ToString().ToLower() +
                 str.Substring(1);
+        }
+
+        public static string ToDashCase(this string str)
+        {
+            return string.Concat(str.Select((x, i) => i > 0 && char.IsUpper(x) ? "-" + x.ToString() : x.ToString())).ToLower();
         }
     }
 }

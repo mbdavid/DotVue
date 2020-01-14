@@ -23,6 +23,14 @@
     <pre>{{$data}}</pre>
 </div>
 
+<style scoped>
+    [todo-client] {
+        color: red;
+    }
+
+    button { color: blue;}
+</style>
+
 <script>
 
     this.items.push({ text: "My first demo", done: false });

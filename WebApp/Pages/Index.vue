@@ -1,6 +1,6 @@
 ﻿@page / 
 
-<div class="item">
+<div>
     <h1>My Id Counter is {{ id }}</h1>
     <button type="button"
             @click="clickMe(5)">
@@ -13,13 +13,17 @@
     <hr/>
     <input v-model="text" />
     <hr/>
-    {{text}} | Code: {{ code }}
+    {{text | upper }} | Code: {{ code }}
     <hr/>
     <button @click="showCode()">ShowCode (with confirm)</button>
     <hr/>
 </div>
-
 <style scoped>
+
+    & {
+        background-color: #f5f5f5;
+        padding: 15px;
+    }
 
     button {
         color:red;
@@ -37,6 +41,15 @@
         else {
             r.reject();
         }
+    })
+
+</script>
+<script global>
+
+    // global script block will be added as script before load components
+
+    Vue.filter('upper', function (value) {
+        return value.toString().toUpperCase();
     })
 
 </script>

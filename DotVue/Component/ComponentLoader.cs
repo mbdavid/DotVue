@@ -28,7 +28,7 @@ namespace DotVue
             _root = env.ContentRootPath;
         }
 
-        public ComponentInfo Load(Assembly assembly, string resourceName)
+        public ComponentInfo Load(Assembly assembly, string resourceName, StringBuilder globalScripts)
         {
             // try read file from local disk (for hot reload)
             var localFile = Path.Combine(_root + @"\..\",
@@ -40,7 +40,7 @@ namespace DotVue
                 File.ReadAllText(localFile) :
                 new StreamReader(assembly.GetManifestResourceStream(resourceName)).ReadToEnd();
 
-            var html = new HtmlFile(content);
+            var html = new HtmlFile(content, globalScripts);
             var name = html.GetDirective("name") ?? Path.GetFileNameWithoutExtension(localFile);
             var component = new ComponentInfo(name);
 

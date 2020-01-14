@@ -14,6 +14,8 @@ namespace WebApp.Pages
 
         public void Post()
         {
+            ClientScript.Alert(this.DateValue.ToString("o"));
+
             this.DateValue = DateValue.AddYears(-1);
             this.DecimalValue = -DecimalValue;
             this.BoolValue = !BoolValue;

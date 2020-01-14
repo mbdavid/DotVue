@@ -13,7 +13,7 @@ namespace WebApp.Pages
         [QueryString]
         public string Page;
 
-        public void ShowRoute()
+        public void ShowData()
         {
             this.ClientScript.Alert("ID = " + Id + " - Page = " + this.Page);
         }

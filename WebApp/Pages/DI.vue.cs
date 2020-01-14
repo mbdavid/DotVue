@@ -63,5 +63,13 @@ namespace WebApp.Pages
             this.Singleton3 = _serviceProvider.GetService<IOperationSingleton>().OperationId;
             this.SingletonInstance3 = _serviceProvider.GetService<IOperationSingletonInstance>().OperationId;
         }
+
+        public void MethodCall(int dummy, int d, IOperationTransient transient, IOperationScoped scoped, IOperationSingleton singleton, IOperationSingletonInstance singletonInstance)
+        {
+            this.Transient3 = transient.OperationId;
+            this.Scoped3 = scoped.OperationId;
+            this.Singleton3 = singleton.OperationId;
+            this.SingletonInstance3 = singletonInstance.OperationId;
+        }
     }
 }
