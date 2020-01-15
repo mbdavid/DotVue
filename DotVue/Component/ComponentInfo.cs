@@ -28,7 +28,7 @@ namespace DotVue
         public Dictionary<string, object> Props { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, object> RouteParams { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, object> QueryString { get; set; } = new Dictionary<string, object>();
-        public Dictionary<string, FieldInfo> Cookies { get; set; } = new Dictionary<string, FieldInfo>();
+        public Dictionary<string, string> LocalStorage { get; set; } = new Dictionary<string, string>();
 
         public bool IsAuthenticated { get; set; }
         public string[] Roles { get; set; } = new string[0];

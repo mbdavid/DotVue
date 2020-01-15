@@ -51,9 +51,6 @@ namespace DotVue
             // populate my object with client $props
             JsonConvert.PopulateObject(props, vm);
 
-            // populate all cookies attributes
-            this.ReadCookies(vm, context.Request.Cookies);
-
             // parse $data as original value (before any update)
             var original = JObject.FromObject(vm, jsonSerializer);
 
@@ -73,9 +70,6 @@ namespace DotVue
 
                 // detect changed from original to current data and send back to browser
                 var diff = this.GetDiff(original, current);
-
-                // write cookies into http response
-                this.WriteCookies(vm, context.Response.Cookies);
 
                 // write changes to writer
                 using (var w = new JsonTextWriter(writer))
@@ -184,40 +178,6 @@ namespace DotVue
             }
 
             return diff;
-        }
-
-        private void ReadCookies(ViewModel vm, IRequestCookieCollection cookies)
-        {
-            var type = vm.GetType();
-
-            foreach (var field in _component.Cookies)
-            {
-                var value = cookies[field.Key];
-
-                if (value != null)
-                {
-                    field.Value.SetValue(vm, Convert.ChangeType(value, field.Value.FieldType));
-                }
-            }
-        }
-
-        private void WriteCookies(ViewModel vm, IResponseCookies cookies)
-        {
-            var type = vm.GetType();
-
-            foreach (var field in _component.Cookies)
-            {
-                var value = field.Value.GetValue(vm);
-
-                if (value != null)
-                {
-                    cookies.Append(field.Key.ToCamelCase(), value.ToString());
-                }
-                else
-                {
-                    cookies.Delete(field.Key.ToCamelCase());
-                }
-            }
         }
 
         #endregion

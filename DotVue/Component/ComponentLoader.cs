@@ -76,10 +76,10 @@ namespace DotVue
                 component.RouteParams = this.GetField<RouteParamAttribute>(component.ViewModelType, instance);
                 component.QueryString = this.GetField<QueryStringAttribute>(component.ViewModelType, instance);
 
-                component.Cookies = component.ViewModelType
-                    .GetFields(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(x => x.GetCustomAttribute<CookieAttribute>() != null)
-                    .ToDictionary(x => x.Name, x => x, StringComparer.OrdinalIgnoreCase);
+                component.LocalStorage = component.ViewModelType
+                    .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    .Where(x => x.GetCustomAttribute<LocalStorageAttribute>() != null)
+                    .ToDictionary(x => x.Name, x => x.GetCustomAttribute<LocalStorageAttribute>().Key ?? x.Name.ToCamelCase(), StringComparer.OrdinalIgnoreCase);
             }
 
             component.InheritAttrs = !component.Template.Contains("v-bind=\"$attrs\"");

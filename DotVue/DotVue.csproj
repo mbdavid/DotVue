@@ -13,7 +13,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Title>DotVue</Title>
     <PackageId>DotVue</PackageId>
-    <PackageVersion>2.0.1</PackageVersion>
+    <PackageVersion>2.0.2</PackageVersion>
     <PackageTags>server c# asp net core vue vuejs</PackageTags>
     <PackageLicenseUrl>https://raw.github.com/mbdavid/DotVue/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/mbdavid/DotVue</RepositoryUrl>
