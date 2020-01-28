@@ -186,7 +186,7 @@ namespace DotVue
             {
                 var last = component == components.Last() ? "" : ",";
 
-                _writer.Append($"  {{ path: '{component.Route}', component: {component.Name} }}{last}\n");
+                _writer.Append($"  {{ path: '{component.Route}', name: '{component.Name.ToLower()}', component: {component.Name} }}{last}\n");
             }
 
             _writer.Append($"];\n");
