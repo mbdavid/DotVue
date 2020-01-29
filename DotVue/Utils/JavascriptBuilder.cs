@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 using System.Web;
 
@@ -43,6 +45,30 @@ namespace DotVue
         public JavascriptBuilder RedirectTo(string url)
         {
             return this.Code("location.href = '{0}';", HttpUtility.JavaScriptStringEncode(url));
+        }
+
+        /// <summary>
+        /// To navigate to a different URL with literal string path 
+        /// </summary>
+        public JavascriptBuilder Push(string path)
+        {
+            return this.Code("this.$router.push('{0}');", path);
+        }
+
+        /// <summary>
+        /// To navigate to a different URL with a named route
+        /// </summary>
+        public JavascriptBuilder PushNamedRoute(string name, KeyValuePair<string,string> param)
+        {
+            return this.Code("this.$router.push({{ name: '{0}', params: {{ '{1}' :'{2}' }} }}); ", name, param.Key, param.Value);
+        }
+
+        /// <summary>
+        /// To navigate to a different URL with with query
+        /// </summary>
+        public JavascriptBuilder PushWithQuery(string path, Dictionary<string,string> query)
+        {
+            return this.Code("this.$router.push({{ path: '{0}', query: {1} }});", path, JsonConvert.SerializeObject(query));
         }
 
         /// <summary>
@@ -100,6 +126,7 @@ namespace DotVue
         public JavascriptBuilder Code(string format, params object[] args)
         {
             _sb.AppendFormat(format, args);
+            
             return this;
         }
 
