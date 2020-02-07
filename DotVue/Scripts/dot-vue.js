@@ -162,7 +162,7 @@ const DotVue = {
 
             // handle before submit viewmodel
             if (typeof DotVue.onrequest === 'function') {
-                dotv.onrequest(xhr, form);
+                DotVue.onrequest(xhr, form);
             }
 
             xhr.send(form);

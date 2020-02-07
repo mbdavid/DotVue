@@ -2,14 +2,8 @@
 
 <div>
     <h1>My Id Counter is {{ id }}</h1>
-    <button type="button"
-            @click="clickMe(5)">
-        ClickMe-Server
-    </button>
-    <button type="button"
-            @click="id++">
-        ClickMe-Client
-    </button>
+    <button type="button" @click="clickMe(5)">ClickMe-Server</button>
+    <button type="button" @click="id++">ClickMe-Client</button>
     <hr/>
     <input v-model="text" />
     <hr/>
@@ -18,6 +12,7 @@
     <button @click="showCode()">ShowCode (with confirm)</button>
     <hr/>
 </div>
+
 <style scoped>
 
     & {
@@ -44,6 +39,7 @@
     })
 
 </script>
+
 <script global>
 
     // global script block will be added as script before load components

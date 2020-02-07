@@ -51,14 +51,14 @@ namespace DotVue
 
                 writer.Append("(function() {\n");
 
-                // inject global script
-                writer.Append(_config.GlobalScripts);
-
                 // inject dot-vue.js
                 writer.Append(new StreamReader(typeof(Handler)
                     .Assembly
                     .GetManifestResourceStream("DotVue.Scripts.dot-vue.js"))
                     .ReadToEnd());
+
+                // inject global script
+                writer.Append(_config.GlobalScripts);
 
                 writer.Append("//\n// Create Vue Components\n//\n");
 
