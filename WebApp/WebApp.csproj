@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Controls\Counter.vue" />
     <None Remove="Pages\DataType.vue" />
     <None Remove="Pages\DI.vue" />
     <None Remove="Pages\Encoding.vue" />
@@ -16,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Controls\Counter.vue" />
     <EmbeddedResource Include="Pages\DataType.vue" />
     <EmbeddedResource Include="Pages\DI.vue" />
     <EmbeddedResource Include="Pages\Encoding.vue" />

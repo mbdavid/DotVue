@@ -1,15 +1,7 @@
 ﻿@page / 
 
 <div>
-    <h1>My Id Counter is {{ id }}</h1>
-    <button type="button"
-            @click="clickMe(5)">
-        ClickMe-Server
-    </button>
-    <button type="button"
-            @click="id++">
-        ClickMe-Client
-    </button>
+    <counter :number="100"></counter>
     <hr/>
     <input v-model="text" />
     <hr/>

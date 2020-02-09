@@ -46,6 +46,14 @@ namespace DotVue
         }
 
         /// <summary>
+        /// Push a new route to $router
+        /// </summary>
+        public JavascriptBuilder NavigateTo(string url)
+        {
+            return this.Code("this.$router.push('{0}');", url);
+        }
+
+        /// <summary>
         /// Reload location
         /// </summary>
         public JavascriptBuilder Reload()
