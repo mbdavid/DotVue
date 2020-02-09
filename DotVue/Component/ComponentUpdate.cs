@@ -33,7 +33,7 @@ namespace DotVue
 
         #region Update Models
 
-        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, IFormFileCollection files, IServiceProvider serviceProvider, TextWriter writer)
+        public async Task UpdateModel(ViewModel vm, string data, string props, string method, JToken[] parameters, HttpContext context, TextWriter writer)
         {
             var jsonSerializer = new JsonSerializer
             {
@@ -60,7 +60,7 @@ namespace DotVue
                 ViewModel.SetData(vm, original);
 
                 // if has method, call in existing vms
-                var result = this.ExecuteMethod(method, vm, parameters, files, serviceProvider);
+                var result = this.ExecuteMethod(method, vm, parameters, context.Request.Form.Files, context.RequestServices);
 
                 // now, get viewmodel changes on data
                 var current = JObject.FromObject(vm, jsonSerializer);

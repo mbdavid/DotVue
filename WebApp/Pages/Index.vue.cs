@@ -12,7 +12,7 @@ namespace WebApp.Pages
 
         public void ShowCode()
         {
-            ClientScript.Alert(this.Code);
+            ClientScript.Code("this.$router.push('todo-client');");
         }
 
         //public void Text_Watch(string newValue, string oldValue)

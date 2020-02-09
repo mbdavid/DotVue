@@ -11,6 +11,7 @@
     <None Remove="Pages\Encoding.vue" />
     <None Remove="Pages\Error.vue" />
     <None Remove="Pages\Index.vue" />
+    <None Remove="Pages\LocalStorage.vue" />
     <None Remove="Pages\Route.vue" />
     <None Remove="Pages\TodoClient.vue" />
     <None Remove="Pages\Upload.vue" />
@@ -20,6 +21,7 @@
     <EmbeddedResource Include="Controls\Counter.vue" />
     <EmbeddedResource Include="Pages\DataType.vue" />
     <EmbeddedResource Include="Pages\DI.vue" />
+    <EmbeddedResource Include="Pages\LocalStorage.vue" />
     <EmbeddedResource Include="Pages\Encoding.vue" />
     <EmbeddedResource Include="Pages\Error.vue" />
     <EmbeddedResource Include="Pages\Index.vue" />

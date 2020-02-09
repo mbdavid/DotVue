@@ -75,7 +75,7 @@ namespace DotVue
             // render watchs
             var watch = component.Methods.Where(x => x.Value.Watch != null).ToArray();
 
-            if (watch.Length > 0)
+            if (watch.Length > 0 || component.LocalStorage.Count > 0)
             {
                 _writer.Append($"  watch: {{\n");
 
@@ -83,11 +83,20 @@ namespace DotVue
                 {
                     var name = w.Value.Watch.ToCamelCase();
                     var method = w.Value.Method.Name.ToCamelCase();
-                    var last = w.Key == watch.Last().Key ? "" : ",";
 
                     _writer.Append($"    {name}: function(v, o) {{\n");
                     _writer.Append($"      this.{method}(v, o);\n");
-                    _writer.Append($"    }}{last}\n");
+                    _writer.Append($"    }},\n");
+                }
+
+                foreach (var w in component.LocalStorage)
+                {
+                    var name = w.Key.ToCamelCase();
+                    var key = w.Value;
+
+                    _writer.Append($"    {name}: function(v, o) {{\n");
+                    _writer.Append($"      if(v === null || v === undefined) localStorage.removeItem('{key}'); else localStorage.setItem('{key}', v);\n");
+                    _writer.Append($"    }},\n");
                 }
 
                 _writer.Append("  },\n");
@@ -111,7 +120,11 @@ namespace DotVue
             }
 
             // register initial scripts and/or hood OnCreated server call
-            if (component.CreatedHook || !string.IsNullOrEmpty(component.Scripts) || component.QueryString.Count > 0 || component.RouteParams.Count > 0)
+            if (component.CreatedHook || 
+                !string.IsNullOrEmpty(component.Scripts) || 
+                component.QueryString.Count > 0 || 
+                component.RouteParams.Count > 0 || 
+                component.LocalStorage.Count > 0)
             {
                 _writer.Append($"  created: function() {{\n");
 
@@ -127,6 +140,14 @@ namespace DotVue
                     var name = qs.Key.ToCamelCase();
 
                     _writer.Append($"    if (this.$route.query.{name} !== undefined) this.{name} = this.$route.query.{name};\n");
+                }
+
+                foreach (var ls in component.LocalStorage)
+                {
+                    var name = ls.Key.ToCamelCase();
+                    var key = ls.Value;
+
+                    _writer.Append($"    if (localStorage.getItem('{key}') !== null) this.{name} = localStorage.getItem('{key}');\n");
                 }
 
                 if (!string.IsNullOrEmpty(component.Scripts))
