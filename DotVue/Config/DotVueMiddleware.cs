@@ -24,5 +24,10 @@ namespace DotVue
                 app.UseMiddleware<Handler>(config);
             });
         }
+
+        public static void AddDotVue(this IServiceCollection services)
+        {
+            services.AddScoped<IVueContext, VueContext>();
+        }
     }
 }

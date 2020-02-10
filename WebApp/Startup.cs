@@ -22,6 +22,8 @@ namespace WebApp
             services.AddSingleton<IOperationSingleton, Operation>();
             services.AddSingleton<IOperationSingletonInstance>(new Operation(Guid.Empty));
             services.AddTransient<OperationService, OperationService>();
+
+            services.AddDotVue();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

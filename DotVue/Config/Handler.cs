@@ -131,6 +131,13 @@ namespace DotVue
 
                 var vm = (ViewModel)ActivatorUtilities.CreateInstance(context.RequestServices, component.ViewModelType);
 
+                // adding reference to viewmodel
+                var vueContext = context.RequestServices.GetService<IVueContext>();
+
+                vueContext.HttpContext = context;
+                vueContext.ViewModel = vm;
+                vueContext.Method = method;
+
                 await update.UpdateModel(vm, data, props, method, parameters, context, writer);
             }
         }
