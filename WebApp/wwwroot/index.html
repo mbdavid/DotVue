@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=9;IE=10;IE=Edge,chrome=1" />
-    <script src="https://unpkg.com/vue/dist/vue.js"></script>
-    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router@3/dist/vue-router.js"></script>
 </head>
 <body>
 
@@ -18,7 +18,7 @@
             </li>
         </ul>
         <router-view :key="$route.fullPath"></router-view>
-        <a target="_blank" class="source" :href="pages.find(x => x.path == $route.path).component.name + '.vue'">Show generated vue component</a>
+        <a target="_blank" class="source" :href="pages.find(x => x.path == $route.path)?.component.name + '.vue'">Show generated vue component</a>
     </div>
 
     <script src="bootstrap.vue"></script>

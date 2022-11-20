@@ -135,7 +135,17 @@ const DotVue = {
 
             form.append('method', request.name);
             form.append('props', JSON.stringify(request.vm.$props || {}));
-            form.append('data', JSON.stringify(request.vm.$data || {}));
+
+            // create a simple copy
+            var dataCopy = Object.assign({}, request.vm.$data);
+
+            // and remove local properties before send to server
+            Object.keys(dataCopy).forEach((key) => {
+                if (request.vm.$options.serverProps.indexOf(key) == -1)
+                    delete dataCopy[key];
+            });
+
+            form.append('data', JSON.stringify(dataCopy || {}));
 
             // upload file
             request.params.forEach(function (value, index, arr) {

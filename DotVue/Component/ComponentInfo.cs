@@ -29,6 +29,7 @@ namespace DotVue
         public Dictionary<string, object> RouteParams { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, object> QueryString { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, string> LocalStorage { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, object> Locals { get; set; } = new Dictionary<string, object>();
 
         public bool IsAuthenticated { get; set; }
         public string[] Roles { get; set; } = new string[0];

@@ -9,6 +9,7 @@ namespace WebApp.Pages
     {
         public string CurrentText { get; set; } = "";
         public List<Todo> Items { get; set; } = new List<Todo>();
+        public string Title { get; set; } = "My Title";
 
         public void Save()
         {

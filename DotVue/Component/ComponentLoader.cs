@@ -75,6 +75,7 @@ namespace DotVue
                 component.Props = this.GetField<PropAttribute>(component.ViewModelType, instance);
                 component.RouteParams = this.GetField<RouteParamAttribute>(component.ViewModelType, instance);
                 component.QueryString = this.GetField<QueryStringAttribute>(component.ViewModelType, instance);
+                component.Locals = this.GetProperty<LocalAttribute>(component.ViewModelType, instance);
 
                 component.LocalStorage = component.ViewModelType
                     .GetProperties(BindingFlags.Instance | BindingFlags.Public)
@@ -120,6 +121,18 @@ namespace DotVue
         {
             return type
                 .GetFields(BindingFlags.Instance | BindingFlags.Public)
+                .Where(x => x.GetCustomAttribute<T>() != null)
+                .ToDictionary(x => x.Name, x => x.GetValue(instance), StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Get all property defined as [Local] attribute
+        /// </summary>
+        private Dictionary<string, object> GetProperty<T>(Type type, ViewModel instance)
+            where T : Attribute
+        {
+            return type
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(x => x.GetCustomAttribute<T>() != null)
                 .ToDictionary(x => x.Name, x => x.GetValue(instance), StringComparer.OrdinalIgnoreCase);
         }
