@@ -8,6 +8,10 @@
     </div>
 
     <button @click="showData()">ShowQuery()</button>
+    <pre>$route.params.id: {{ $route.params.id }}</pre>
+    <pre>$route.fullPath: {{ $route.fullPath }}</pre>
+    <pre>$route.path: {{ $route.path }}</pre>
+    <pre>$route.query: {{ $route.query }}</pre>
     <pre>$data: {{ $data }}</pre>
 
 </div>

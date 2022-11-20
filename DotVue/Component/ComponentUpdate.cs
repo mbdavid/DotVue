@@ -84,6 +84,16 @@ namespace DotVue
                     await output.WriteToAsync(w);
                 }
             }
+            catch (HttpException ex)
+            {
+                // HttpException status code is lost at this point, re-assign
+                if (ex.Message.StartsWith("Unauthorized"))
+                    context.Response.StatusCode = 401;
+                else if (ex.Message.StartsWith("Forbidden"))
+                    context.Response.StatusCode = 403;
+                else
+                    context.Response.StatusCode = 500;
+            }
             finally
             {
                 // dispose vm
