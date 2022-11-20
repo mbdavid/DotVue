@@ -13,6 +13,8 @@
     <hr/>
     {{text | upper }} | Code: {{ code }}
     <hr/>
+    {{localOnly}}
+    <hr/>
     <button @click="submitWithConfirm()">Submit (with confirm)</button>
     <hr/>
 </div>

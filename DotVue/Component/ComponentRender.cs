@@ -119,6 +119,12 @@ namespace DotVue
                 _writer.Append("  ],\n");
             }
 
+            // declare server properties used. Client will exclude any local properties from postback
+            IEnumerable<string> jsonDataProps = component.JsonData.Properties().Select(x => x.Name);
+            IEnumerable<string> localProps = component.Locals.Select(x => x.Key.ToCamelCase());
+
+             _writer.Append($"  serverProps: [{string.Join(", ", jsonDataProps.Except(localProps).Select(x => $"'{x}'"))}],\n");
+
             // register initial scripts and/or hood OnCreated server call
             if (component.CreatedHook || 
                 !string.IsNullOrEmpty(component.Scripts) || 
